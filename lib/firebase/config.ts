@@ -29,10 +29,8 @@ const defaultConfig = {
 // Use environment variables if available, otherwise fall back to default config
 export const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || defaultConfig.apiKey,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || [
-    defaultConfig.authDomain,
-    'krstaging.netlify.app'
-  ].join(','),
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 
+    (process.env.NODE_ENV === 'production' ? 'krstaging.netlify.app' : defaultConfig.authDomain),
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || defaultConfig.projectId,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || defaultConfig.storageBucket,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || defaultConfig.messagingSenderId,
