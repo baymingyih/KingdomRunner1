@@ -1,0 +1,30 @@
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "https://*.webcontainer.io",
+      "https://*.stackblitz.io",
+      "https://*.local-credentialless.webcontainer-api.io"
+    ],
+    "method": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "HEAD",
+      "OPTIONS"
+    ],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "Content-Length",
+      "User-Agent",
+      "X-Goog-Resumable",
+      "Origin",
+      "Access-Control-Allow-Origin"
+    ]
+  }
+]
+
+

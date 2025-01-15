@@ -1,0 +1,18 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/storage/configure-cors/route": "app/api/storage/configure-cors/route.js",
+  "/api/storage/test-upload/route": "app/api/storage/test-upload/route.js",
+  "/api/test-cors/route": "app/api/test-cors/route.js",
+  "/api/configure-cors/route": "app/api/configure-cors/route.js",
+  "/api/test-cors/check/route": "app/api/test-cors/check/route.js",
+  "/about/page": "app/about/page.js",
+  "/events/page": "app/events/page.js",
+  "/page": "app/page.js",
+  "/leaderboard/page": "app/leaderboard/page.js",
+  "/prayer-wall/page": "app/prayer-wall/page.js",
+  "/prayer-points/page": "app/prayer-points/page.js",
+  "/events/[id]/page": "app/events/[id]/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/login/page": "app/login/page.js",
+  "/register/page": "app/register/page.js"
+}
