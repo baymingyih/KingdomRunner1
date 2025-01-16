@@ -10,9 +10,11 @@ interface EmailStepProps {
   disabled?: boolean;
 }
 
+import { FormProvider } from 'react-hook-form';
+
 export function EmailStep({ form, disabled }: EmailStepProps) {
   return (
-    <>
+    <FormProvider {...form}>
       <FormField
         name="email"
         render={({ field }) => (
@@ -57,6 +59,6 @@ export function EmailStep({ form, disabled }: EmailStepProps) {
           </FormItem>
         )}
       />
-    </>
+    </FormProvider>
   );
 }
