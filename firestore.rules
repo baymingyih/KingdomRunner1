@@ -13,21 +13,7 @@ service cloud.firestore {
     // User profiles
     match /users/{userId} {
       allow read: if isAuthenticated();
-      
-      // Validate user data
-      function isValidUser() {
-        let data = request.resource.data;
-        return data.email is string &&
-               data.displayName is string &&
-               data.country is string &&
-               data.createdAt is timestamp;
-      }
-      
-      // Allow creation of new users
-      allow create: if isValidUser();
-      
-      // Allow updates/deletes only by owner
-      allow update, delete: if isOwner(userId);
+      allow write: if isOwner(userId);
     }
     
     // Activities

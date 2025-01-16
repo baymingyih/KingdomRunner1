@@ -11,16 +11,7 @@ interface FormFieldProps {
 }
 
 const FormField: React.FC<FormFieldProps> = ({ name, label, render }) => {
-  const formContext = useFormContext();
-  
-  if (!formContext) {
-    throw new Error(
-      'FormField must be used within a FormProvider. ' +
-      'Make sure your component is wrapped in a Form component.'
-    );
-  }
-
-  const { control } = formContext;
+  const { control } = useFormContext();
   
   return (
     <Controller
