@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from 'components/ui/button';
@@ -81,44 +81,42 @@ export default function LoginPage() {
             </Alert>
           )}
           
-          <FormProvider {...form}>
-            <Form {...form} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  name="email"
-                  label="Email"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="your@email.com"
-                      disabled={isLoading}
-                    />
-                  )}
-                />
-                <FormField
-                  name="password"
-                  label="Password"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="••••••••"
-                      disabled={isLoading}
-                    />
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    'Sign In'
-                  )}
-                </Button>
-            </Form>
-          </FormProvider>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                name="email"
+                label="Email"
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="your@email.com"
+                    disabled={isLoading}
+                  />
+                )}
+              />
+              <FormField
+                name="password"
+                label="Password"
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="password"
+                    placeholder="••••••••"
+                    disabled={isLoading}
+                  />
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+          </form>
           
           <div className="mt-6 text-center space-y-2">
             <p className="text-sm text-muted-foreground">

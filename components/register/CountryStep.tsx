@@ -5,68 +5,46 @@ import { FormMessage } from 'components/ui/form/form-message';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'components/ui/select';
 import { Controller, UseFormReturn, FieldError, Path } from 'react-hook-form';
 
-import { z } from 'zod';
-
-export const countrySchema = z.object({
-  country: z.string().min(1, 'Please select your country')
-});
-
 const countries = [
-  { code: 'US', name: 'United States' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'AU', name: 'Australia' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'FR', name: 'France' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'JP', name: 'Japan' },
-  { code: 'CN', name: 'China' },
-  { code: 'IN', name: 'India' },
-  { code: 'BR', name: 'Brazil' },
-  // Add more countries as needed
+  "United States", "United Kingdom", "Canada", "Australia", "Germany",
+  "France", "Spain", "Italy", "Japan", "China", "India", "Brazil",
 ];
 
 interface CountryStepProps<T extends { country: string }> {
   form: UseFormReturn<T>;
   disabled?: boolean;
-  required?: boolean;
 }
 
-import { FormProvider } from 'react-hook-form';
-
-export function CountryStep<T extends { country: string }>({ form, disabled, required }: CountryStepProps<T>) {
+export function CountryStep<T extends { country: string }>({ form, disabled }: CountryStepProps<T>) {
   return (
-    <FormProvider {...form}>
-      <Controller
-        control={form.control}
-        name={'country' as Path<T>}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Country
-              {required && <span className="text-destructive ml-1">*</span>}
-            </FormLabel>
+    <Controller
+      control={form.control}
+      name={'country' as Path<T>}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Country</FormLabel>
+          <Select 
+            onValueChange={field.onChange} 
+            defaultValue={field.value}
+          >
             <FormControl>
-              <select
-                {...field}
-                disabled={disabled}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">Select your country</option>
-                {countries.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
+              <SelectTrigger disabled={disabled}>
+                <SelectValue placeholder="Select your country" />
+              </SelectTrigger>
             </FormControl>
-            <FormMessage>
-              {(form.formState.errors.country as FieldError)?.message}
-            </FormMessage>
-          </FormItem>
-        )}
-      />
-    </FormProvider>
+            <SelectContent>
+              {countries.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage>
+            {(form.formState.errors.country as FieldError)?.message}
+          </FormMessage>
+        </FormItem>
+      )}
+    />
   );
 }

@@ -11,14 +11,12 @@ interface NameStepProps {
   disabled?: boolean;
 }
 
-import { FormProvider } from 'react-hook-form';
-
 export function NameStep({ form, disabled }: NameStepProps) {
   return (
-    <FormProvider {...form}>
+    <>
       <FormField
         name="firstName"
-        render={({ field }: { field: any }) => (
+        render={({ field }) => (
           <FormItem>
             <FormLabel>First Name</FormLabel>
             <FormControl>
@@ -30,7 +28,7 @@ export function NameStep({ form, disabled }: NameStepProps) {
       />
       <FormField
         name="lastName"
-        render={({ field }: { field: any }) => (
+        render={({ field }) => (
           <FormItem>
             <FormLabel>Last Name</FormLabel>
             <FormControl>
@@ -40,6 +38,6 @@ export function NameStep({ form, disabled }: NameStepProps) {
           </FormItem>
         )}
       />
-    </FormProvider>
+    </>
   );
 }
