@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from 'components/ui/button';
@@ -81,7 +81,8 @@ export default function LoginPage() {
             </Alert>
           )}
           
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 name="email"
                 label="Email"
@@ -116,7 +117,8 @@ export default function LoginPage() {
                   'Sign In'
                 )}
               </Button>
-          </form>
+            </form>
+          </FormProvider>
           
           <div className="mt-6 text-center space-y-2">
             <p className="text-sm text-muted-foreground">
