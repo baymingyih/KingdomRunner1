@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useForm } from 'react-hook-form';
 
 interface FormMessageProps {
   name?: string;
@@ -8,7 +8,8 @@ interface FormMessageProps {
 }
 
 const FormMessage: React.FC<FormMessageProps> = ({ name, children, className }) => {
-  const { formState: { errors } } = useFormContext();
+  const context = useFormContext();
+  const { formState: { errors } } = context || useForm();
   
   const errorMessage = name && errors[name]?.message;
   const displayMessage = errorMessage ? String(errorMessage) : children;

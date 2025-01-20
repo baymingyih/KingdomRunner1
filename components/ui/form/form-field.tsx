@@ -2,7 +2,7 @@ import React from 'react';
 import { Label } from '../label';
 import { FormControl } from './form-control';
 import { FormMessage } from './form-message';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useForm } from 'react-hook-form';
 
 interface FormFieldProps {
   name: string;
@@ -11,7 +11,8 @@ interface FormFieldProps {
 }
 
 const FormField: React.FC<FormFieldProps> = ({ name, label, render }) => {
-  const { control } = useFormContext();
+  const context = useFormContext();
+  const { control } = context || useForm();
   
   return (
     <Controller
