@@ -31,7 +31,8 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
         userId: user.uid,
         eventId: eventId.toString(),
         distance: data.distance.toString(),
-        duration: data.duration.toString(),
+        hours: data.hours.toString(),
+        minutes: data.minutes.toString(),
         location: data.location,
         notes: data.notes,
         image: data.image
@@ -92,9 +93,19 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
               {activities.map((activity) => (
                 <div key={activity.id} className="p-4 rounded-lg bg-muted">
                   <p className="font-medium">{activity.distance.toFixed(1)} km</p>
+                  <p className="text-sm">{activity.hours}h {activity.minutes}m</p>
                   <p className="text-sm text-muted-foreground">{activity.location}</p>
                   {activity.notes && (
                     <p className="text-sm mt-2">{activity.notes}</p>
+                  )}
+                  {activity.imageUrl && (
+                    <div className="mt-2 relative aspect-video w-full overflow-hidden rounded-lg border">
+                      <img
+                        src={activity.imageUrl}
+                        alt="Activity"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                   )}
                 </div>
               ))}

@@ -57,11 +57,17 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
     
     setImporting(activity.id);
     try {
+      // Convert seconds to hours and minutes
+      const totalMinutes = Math.floor(activity.moving_time / 60);
+      const hours = Math.floor(totalMinutes / 60).toString();
+      const minutes = (totalMinutes % 60).toString();
+      
       await logActivity({
         userId: user.uid,
         eventId: eventId.toString(),
         distance: (activity.distance / 1000).toString(), // Convert meters to kilometers
-        duration: activity.moving_time.toString(),
+        hours: hours,
+        minutes: minutes,
         location: [activity.location_city, activity.location_country].filter(Boolean).join(', ') || 'Unknown location',
         notes: `Imported from Strava: ${activity.name}`,
       });

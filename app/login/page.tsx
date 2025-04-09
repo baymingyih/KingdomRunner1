@@ -5,7 +5,6 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from 'components/ui/button';
-import { Form } from 'components/ui/form';
 import { FormField } from 'components/ui/form/form-field';
 import { FormItem } from 'components/ui/form/form-item';
 import { FormLabel } from 'components/ui/form/form-label';

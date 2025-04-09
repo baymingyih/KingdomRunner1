@@ -9,11 +9,13 @@ export const activitySchema = z.object({
     .transform((val) => parseFloat(val))
     .refine((val) => val > 0, 'Distance must be greater than 0'),
     
-  duration: z.string()
-    .min(1, 'Duration is required')
+  hours: z.string()
+    .optional(),
+  minutes: z.string()
+    .min(1, 'Minutes are required')
     .transform((val) => parseInt(val))
-    .refine((val) => val > 0, 'Duration must be greater than 0'),
-    
+    .refine((val) => val >= 0, 'Minutes must be a positive number'),
+
   location: z.string()
     .min(1, 'Location is required')
     .max(100, 'Location must be less than 100 characters'),

@@ -12,7 +12,7 @@ export default function EventCountdown() {
   });
 
   useEffect(() => {
-    const targetDate = new Date('2023-12-31T00:00:00').getTime();
+    const targetDate = new Date('2025-05-21T00:00:00').getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -32,16 +32,26 @@ export default function EventCountdown() {
   return (
     <Card className="my-8">
       <CardHeader>
-        <CardTitle className="text-center">Next Global Run</CardTitle>
+        <CardTitle className="text-center text-2xl">
+          FCA EAST GLOBAL CONFERENCE
+        </CardTitle>
+        <p className="text-center text-muted-foreground">
+          Hong Kong • May 21-25, 2025
+        </p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-4 gap-4 text-center">
-          {Object.entries(timeLeft).map(([unit, value]) => (
-            <div key={unit} className="flex flex-col">
-              <span className="text-3xl font-bold">{value}</span>
-              <span className="text-sm uppercase">{unit}</span>
-            </div>
-          ))}
+        <div className="space-y-4">
+          <p className="text-center text-lg">
+            Countdown to Conference Start
+          </p>
+          <div className="grid grid-cols-4 gap-4 text-center">
+            {Object.entries(timeLeft).map(([unit, value]) => (
+              <div key={unit} className="flex flex-col bg-primary/10 p-4 rounded-lg">
+                <span className="text-3xl font-bold text-primary">{value}</span>
+                <span className="text-sm uppercase text-muted-foreground">{unit}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

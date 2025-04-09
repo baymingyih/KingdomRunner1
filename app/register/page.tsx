@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from 'components/ui/button';
-import { Form } from 'components/ui/form';
+import { FormProvider } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from 'components/ui/card';
 import { useToast } from 'components/ui/use-toast';
 import { EmailStep } from 'components/register/EmailStep';
@@ -120,8 +120,9 @@ export default function RegisterPage() {
           <CardTitle className="text-2xl text-center">Join Kingdom Runners</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form} onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="space-y-6">
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="space-y-6">
               {step === 1 && <EmailStep form={form} />}
               {step === 2 && <NameStep form={form} />}
               {step === 3 && <CountryStep form={form} />}
@@ -154,8 +155,9 @@ export default function RegisterPage() {
                   )}
                 </div>
               </div>
-            </Form>
-          </CardContent>
+            </form>
+          </FormProvider>
+        </CardContent>
         </Card>
       </div>
     );

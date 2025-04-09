@@ -1,6 +1,3 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase/init';
-
 export class StorageError extends Error {
   constructor(message: string, public code?: string) {
     super(message);
@@ -24,26 +21,23 @@ export async function uploadActivityImage(file: File, userId: string, activityId
   }
 
   try {
-    // Create a reference with a timestamp to avoid name conflicts
-    const timestamp = Date.now();
-    const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const imageRef = ref(storage, `activities/${userId}/${activityId}/${fileName}`);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('activityId', activityId);
+
+    const response = await fetch('/api/storage/image-upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    const responseData = await response.json();
     
-    // Set proper metadata
-    const metadata = {
-      contentType: file.type,
-      customMetadata: {
-        uploadedAt: new Date().toISOString(),
-        uploadedBy: userId
-      }
-    };
-    
-    // Upload the file with metadata
-    const snapshot = await uploadBytes(imageRef, file, metadata);
-    
-    // Get the download URL
-    const downloadUrl = await getDownloadURL(snapshot.ref);
-    return downloadUrl;
+    if (!response.ok) {
+      throw new StorageError(responseData.error || 'Upload failed', 'upload-failed');
+    }
+
+    const { url } = responseData;
+    return url;
   } catch (error: any) {
     console.error('Error uploading image:', error);
     

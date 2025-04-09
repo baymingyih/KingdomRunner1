@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import Link from 'next/link';
 import { ChevronRight, ChevronLeft, Heart, ArrowLeftIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const prayerPoints = [
   {
-    title: "Physical Strength",
-    prayer: "Lord, grant us the strength to run with perseverance the race marked out for us. (Hebrews 12:1)",
-    focus: "Pray for physical endurance and protection from injuries."
+    title: "God's Glory Revealed: The Power of His Presence",
+    prayer: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand. (Isaiah 41:10)",
+    focus: "Meditate on God's promise to be with you and strengthen you in all circumstances."
   },
   {
     title: "Mental Resilience",
@@ -72,7 +73,7 @@ export default function DailyPrayer() {
       <CardHeader>
         <CardTitle className="text-center flex items-center justify-center gap-2">
           <Heart className="h-5 w-5 text-primary" />
-          Daily Prayer Guide
+          Verse of the Week
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -93,9 +94,14 @@ export default function DailyPrayer() {
             >
               <h3 className="text-xl font-semibold mb-4">{currentPoint.title}</h3>
               <p className="italic mb-4">{currentPoint.prayer}</p>
-              <div className="bg-muted p-4 rounded-lg">
+              <div className="bg-muted p-4 rounded-lg mb-4">
                 <p className="text-sm text-muted-foreground">{currentPoint.focus}</p>
               </div>
+              <Link href="/verse-of-the-week" className="inline-block">
+                <Button className={buttonVariants({ variant: 'outline' }) + " w-full"}>
+                  Read Full Article
+                </Button>
+              </Link>
             </motion.div>
           </AnimatePresence>
 

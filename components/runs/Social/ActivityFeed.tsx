@@ -59,6 +59,16 @@ export function ActivityFeed({ activities, onLike, onComment }: ActivityFeedProp
                       {activity.notes && (
                         <p className="mt-2">{activity.notes}</p>
                       )}
+                      
+                      {activity.imageUrl && (
+                        <div className="mt-3 relative aspect-video w-full overflow-hidden rounded-lg border">
+                          <img
+                            src={activity.imageUrl}
+                            alt="Activity"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex gap-4 mt-4">

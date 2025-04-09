@@ -7,7 +7,8 @@ export interface ProgressStats {
 
 export interface ActivityFormData {
   distance: string;
-  duration: string;
+  hours: string;
+  minutes: string;
   location: string;
   notes?: string;
   image?: File;

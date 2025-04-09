@@ -1,7 +1,7 @@
 import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
-export function getAuthCookie() {
-  return (cookies() as unknown as UnsafeUnwrappedCookies).get('auth_token');
+export async function getAuthCookie() {
+  return (await cookies()).get('auth_token');
 }
 
 export function isAuthenticated() {

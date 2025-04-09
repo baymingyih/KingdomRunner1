@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { activitySchema } from '@/lib/schemas/activity';
 import { logActivity } from '@/lib/db/activities';
 
@@ -32,11 +32,38 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
     resolver: zodResolver(activitySchema),
     defaultValues: {
       distance: 0,
-      duration: 0,
+      hours: '',
+      minutes: 0,
       location: '',
-      notes: ''
+      notes: '',
+      image: undefined
     }
   });
+  
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Clean up preview URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const handleImageChange = (file: File | null) => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
+    }
+    
+    return file;
+  };
 
   const onSubmit = async (data: ActivityFormData) => {
     setIsSubmitting(true);
@@ -45,9 +72,11 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
         userId,
         eventId,
         distance: data.distance.toString(),
-        duration: data.duration.toString(),
+        hours: data.hours || '0',
+        minutes: data.minutes.toString(),
         location: data.location,
-        notes: data.notes
+        notes: data.notes,
+        image: data.image
       });
       
       toast({
@@ -75,42 +104,61 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-4">
             <FormField
               name="distance"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Distance (km)</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       step="0.01"
                       placeholder="5.0"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <FormField
-              name="duration"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Duration (minutes)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number"
-                      placeholder="30"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                name="hours"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hours</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                name="minutes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Minutes</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="30"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               name="location"
               render={({ field }) => (
@@ -123,14 +171,14 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
                 </FormItem>
               )}
             />
-            
+
             <FormField
               name="notes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notes (optional)</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Share your experience..."
                       {...field}
                     />
@@ -139,11 +187,58 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
                 </FormItem>
               )}
             />
-            
-            <Button 
-              type="submit" 
+
+            <FormField
+              name="image"
+              render={({ field: { value, onChange, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Activity Image (optional)</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <Input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          disabled={isSubmitting}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            onChange(handleImageChange(file));
+                          }}
+                          {...field}
+                        />
+                        {value && (
+                          <Button
+                            type="button"
+                            className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 w-10 p-0"
+                            onClick={() => {
+                              onChange(handleImageChange(null));
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      {previewUrl && (
+                        <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
+                          <img
+                            src={previewUrl}
+                            alt="Activity preview"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type="submit"
               className="w-full"
               disabled={isSubmitting}
+              onClick={form.handleSubmit(onSubmit)}
             >
               {isSubmitting ? (
                 <>
@@ -154,7 +249,7 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
                 'Submit Activity'
               )}
             </Button>
-          </form>
+          </div>
         </FormProvider>
       </CardContent>
     </Card>

@@ -1,23 +1,29 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
+import { FormProvider } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, X } from 'lucide-react';
-import { activitySchema } from '@/lib/schemas/activity';
-import type { ActivityFormData } from './types';
+import { activitySchema } from '@/lib/schemas/activity'; // Assuming you have a schema
+import type { ActivityFormData } from './types'; // Assuming you have types
 
-interface ActivityFormProps {
-  onSubmit: (data: ActivityFormData) => Promise<void>;
-  submitting: boolean;
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { app } from '@/lib/firebase/init'; // Assuming you have firebaseApp initialized
+
+interface ActivityFormFirebaseProps {
+  onSubmitSuccess?: () => void; // Optional callback for successful submission
+  onError?: (error: Error) => void; // Optional callback for errors
 }
 
-export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
+export function ActivityFormFirebase({ onSubmitSuccess, onError }: ActivityFormFirebaseProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<ActivityFormData>({
     resolver: zodResolver(activitySchema),
     defaultValues: {
@@ -26,44 +32,59 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
       minutes: '',
       location: '',
       notes: '',
-      image: undefined
+      image: undefined, // Changed default to undefined
     },
     mode: "onSubmit"
   });
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const onSubmit = async (data: ActivityFormData) => {
+    setIsSubmitting(true);
+    try {
+      console.log("Form data:", data);
 
-  // Clean up preview URL when component unmounts
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+      const storage = getStorage(app);
+      const firestoreDb = getFirestore(app);
+
+      let imageUrl = null;
+      if (data.image) {
+        const imageRef = ref(storage, `activities/${Date.now()}-${data.image.name}`);
+        const snapshot = await uploadBytes(imageRef, data.image);
+        imageUrl = await getDownloadURL(snapshot.ref);
+        console.log("Image uploaded:", imageUrl);
       }
-    };
-  }, [previewUrl]);
 
-  const handleImageChange = (file: File | null) => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+      const activityData = {
+        ...data,
+        imageUrl: imageUrl,
+        timestamp: new Date(),
+      };
+      delete activityData.image; // Remove File object before storing in Firestore
+
+      const activitiesCollection = collection(firestoreDb, 'activities');
+      const docRef = await addDoc(activitiesCollection, activityData);
+      console.log("Activity logged with ID:", docRef.id);
+
+      setIsSubmitting(false);
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      setIsSubmitting(false);
+      if (onError) {
+        onError(error instanceof Error ? error : new Error('Form submission failed'));
+      }
     }
-    
-    if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setPreviewUrl(null);
-    }
-    
-    return file;
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Log Activity</CardTitle>
+        <CardTitle>Log Activity (Firebase)</CardTitle>
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
-          <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               name="distance"
               render={({ field }) => (
@@ -74,7 +95,7 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
                       type="number"
                       step="0.01"
                       placeholder="5.0"
-                      disabled={submitting}
+                      disabled={isSubmitting}
                       {...field}
                     />
                   </FormControl>
@@ -83,17 +104,17 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex gap-2">
               <FormField
                 name="hours"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Time taken (Hours)</FormLabel>
+                  <FormItem className="w-1/2">
+                    <FormLabel>Hours (optional)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         placeholder="0"
-                        disabled={submitting}
+                        disabled={isSubmitting}
                         {...field}
                       />
                     </FormControl>
@@ -105,13 +126,13 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
               <FormField
                 name="minutes"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-1/2">
                     <FormLabel>Minutes</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         placeholder="30"
-                        disabled={submitting}
+                        disabled={isSubmitting}
                         {...field}
                       />
                     </FormControl>
@@ -129,7 +150,7 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
                   <FormControl>
                     <Input
                       placeholder="Where did you run?"
-                      disabled={submitting}
+                      disabled={isSubmitting}
                       {...field}
                     />
                   </FormControl>
@@ -146,7 +167,7 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
                   <FormControl>
                     <Textarea
                       placeholder="Share your experience..."
-                      disabled={submitting}
+                      disabled={isSubmitting}
                       {...field}
                     />
                   </FormControl>
@@ -166,29 +187,26 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
                         <Input
                           type="file"
                           accept="image/jpeg,image/png,image/webp"
-                          disabled={submitting}
+                          disabled={isSubmitting}
                           onChange={(e) => {
-                            const file = e.target.files?.[0] || null;
-                            onChange(handleImageChange(file));
+                            const file = e.target.files?.[0];
+                            onChange(file);
                           }}
                           {...field}
                         />
                         {value && (
                           <Button
                             type="button"
-                            className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 w-10 p-0"
-                            onClick={() => {
-                              onChange(handleImageChange(null));
-                            }}
+                            onClick={() => onChange(null)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
-                      {previewUrl && (
+                      {value && (
                         <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
                           <img
-                            src={previewUrl}
+                            src={value instanceof File ? URL.createObjectURL(value) : value}
                             alt="Activity preview"
                             className="h-full w-full object-cover"
                           />
@@ -204,10 +222,9 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
             <Button
               type="submit"
               className="w-full"
-              disabled={submitting}
-              onClick={form.handleSubmit(onSubmit)}
+              disabled={isSubmitting}
             >
-              {submitting ? (
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Logging Activity...
@@ -216,7 +233,7 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
                 'Log Activity'
               )}
             </Button>
-          </div>
+          </form>
         </FormProvider>
       </CardContent>
     </Card>
