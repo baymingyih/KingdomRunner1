@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminStorage } from '@/lib/firebase/admin';
 
-const bucket = adminStorage.bucket('kingdomrunnersdv1');
+const bucket = adminStorage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'kingdomrunnersdv1.appspot.com');
 
 // Handle OPTIONS requests (preflight)
 export async function OPTIONS() {
