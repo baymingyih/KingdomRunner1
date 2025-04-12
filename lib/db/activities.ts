@@ -7,7 +7,8 @@ import {
   addDoc,
   Timestamp,
   doc,
-  getDoc
+  getDoc,
+  deleteDoc
 } from 'firebase/firestore';
 import { db } from '../firebase/init';
 import { uploadActivityImage } from '../storage/uploadImage';
@@ -198,31 +199,59 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
   }
 }
 
+export async function deleteActivity(activityId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'activities', activityId));
+  } catch (error) {
+    console.error('Error deleting activity:', error);
+    throw new Error('Failed to delete activity');
+  }
+}
+
 export async function getUserActivities(userId: string): Promise<Activity[]> {
   try {
+    // Create a query to get activities for this user
     const activitiesRef = collection(db, 'activities');
     const q = query(
       activitiesRef,
-      where('userId', '==', userId),
-      orderBy('timestamp', 'desc')
+      where('userId', '==', userId)
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(docSnapshot => {
+    
+    const activities = querySnapshot.docs.map(docSnapshot => {
       const data = docSnapshot.data();
+      
+      // Check if required fields exist
+      if (!data.userId || !data.eventId || !data.location) {
+        return null; // Skip this document
+      }
+      
       // Calculate duration from hours and minutes
       const durationInMinutes = (data.hours || 0) * 60 + (data.minutes || 0);
+      
+      // Handle missing or invalid timestamp
+      let timestamp = new Date();
+      try {
+        if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+          timestamp = data.timestamp.toDate();
+        } else if (data.timestamp) {
+          timestamp = new Date(data.timestamp);
+        }
+      } catch (error) {
+        // Use current date if timestamp parsing fails
+      }
       
       const result: Activity = {
         id: docSnapshot.id,
         userId: data.userId,
         eventId: data.eventId,
-        distance: data.distance,
-        hours: data.hours,
-        minutes: data.minutes,
+        distance: data.distance || 0,
+        hours: data.hours || 0,
+        minutes: data.minutes || 0,
         duration: durationInMinutes,
         location: data.location,
-        timestamp: data.timestamp.toDate(),
+        timestamp: timestamp,
       };
       
       // Include optional fields if they exist
@@ -244,6 +273,9 @@ export async function getUserActivities(userId: string): Promise<Activity[]> {
       
       return result;
     });
+    
+    // Filter out any null values
+    return activities.filter((activity): activity is Activity => activity !== null);
   } catch (error) {
     console.error('Error getting user activities:', error);
     throw new Error('Failed to load activities');

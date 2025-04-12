@@ -9,6 +9,7 @@ import { LoadingSpinner } from './progress/LoadingSpinner';
 import { ErrorDisplay } from './progress/ErrorDisplay';
 import { ProgressStats } from './progress/ProgressStats';
 import { ActivityForm } from './progress/ActivityForm';
+import { RecentRuns } from './progress/RecentRuns';
 import { useProgress } from './progress/useProgress';
 import type { ActivityFormData } from './progress/types';
 
@@ -20,7 +21,7 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
   const [submitting, setSubmitting] = useState(false);
   const { user } = useAuthContext();
   const { toast } = useToast();
-  const { loading, error, activities, stats, updateActivities } = useProgress(user?.uid);
+  const { loading, error, activities, stats, updateActivities, deleteActivity } = useProgress(user?.uid);
 
   const handleSubmit = async (data: ActivityFormData) => {
     if (!user) return;
@@ -84,47 +85,10 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
           submitting={submitting}
         />
         
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Recent Activities</h3>
-          {activities.length === 0 ? (
-            <p className="text-muted-foreground">No activities recorded yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {activities.map((activity) => (
-                <div key={activity.id} className="p-4 rounded-lg bg-muted">
-                  <p className="font-medium">{activity.distance.toFixed(1)} km</p>
-                  <p className="text-sm">{activity.hours}h {activity.minutes}m</p>
-                  <p className="text-sm text-muted-foreground">{activity.location}</p>
-                  {activity.notes && (
-                    <p className="text-sm mt-2">{activity.notes}</p>
-                  )}
-                  {(activity.imageUrl || activity.imageUrls) && (
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      {activity.imageUrl && (
-                        <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                          <img
-                            src={activity.imageUrl}
-                            alt="Activity"
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      )}
-                      {activity.imageUrls?.map((url, index) => (
-                        <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                          <img
-                            src={url}
-                            alt={`Activity ${index + 1}`}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <RecentRuns 
+          activities={activities}
+          onDelete={deleteActivity}
+        />
       </div>
     </div>
   );

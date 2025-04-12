@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react';
-import { getUserActivities, type Activity } from '@/lib/db/activities';
+import { getUserActivities, deleteActivity as deleteDbActivity, type Activity } from '@/lib/db/activities';
 import { useToast } from '@/components/ui/use-toast';
 import type { ProgressStats } from './types';
 
@@ -32,6 +32,18 @@ export function useProgress(userId: string | undefined) {
     const updatedActivities = [newActivity, ...activities];
     setActivities(updatedActivities);
     setStats(calculateStats(updatedActivities));
+  }, [activities, calculateStats]);
+
+  const deleteActivity = useCallback(async (activityId: string) => {
+    try {
+      await deleteDbActivity(activityId);
+      const updatedActivities = activities.filter(a => a.id !== activityId);
+      setActivities(updatedActivities);
+      setStats(calculateStats(updatedActivities));
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      throw error;
+    }
   }, [activities, calculateStats]);
 
   useEffect(() => {
@@ -66,6 +78,7 @@ export function useProgress(userId: string | undefined) {
     error,
     activities,
     stats,
-    updateActivities
+    updateActivities,
+    deleteActivity
   };
 }
