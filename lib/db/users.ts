@@ -5,7 +5,7 @@ import {
   getDocs, 
   query, 
   where, 
-  addDoc,
+  setDoc,
   Timestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase/init';
@@ -69,10 +69,11 @@ export async function createUser(userData: Omit<UserProfile, 'id' | 'createdAt' 
       createdAt: Timestamp.now()
     };
 
-    const docRef = await addDoc(collection(db, 'users'), newUser);
+    const userRef = doc(db, 'users', userData.uid);
+    await setDoc(userRef, newUser);
     
     return {
-      id: docRef.id,
+      id: userData.uid,
       ...newUser,
       createdAt: new Date()
     };

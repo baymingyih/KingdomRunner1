@@ -13,7 +13,8 @@ service cloud.firestore {
     // User profiles
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isOwner(userId);
+      allow create: if request.resource.data.id == userId; // Allow initial creation
+      allow update, delete: if isOwner(userId); // Only owner can modify
     }
     
     // Activities
