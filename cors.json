@@ -2,9 +2,11 @@
   {
     "origin": [
       "http://localhost:3000",
+      "http://localhost:3001", 
       "https://*.webcontainer.io",
       "https://*.stackblitz.io",
-      "https://*.local-credentialless.webcontainer-api.io"
+      "https://*.local-credentialless.webcontainer-api.io",
+      "https://kingdomrunners.app"
     ],
     "method": [
       "GET",
@@ -26,5 +28,3 @@
     ]
   }
 ]
-
-

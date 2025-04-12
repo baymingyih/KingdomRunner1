@@ -47,10 +47,15 @@ export function ActivityFormFirebase({ onSubmitSuccess, onError }: ActivityFormF
 
       let imageUrl = null;
       if (data.image) {
-        const imageRef = ref(storage, `activities/${Date.now()}-${data.image.name}`);
-        const snapshot = await uploadBytes(imageRef, data.image);
-        imageUrl = await getDownloadURL(snapshot.ref);
-        console.log("Image uploaded:", imageUrl);
+        try {
+          const imageRef = ref(storage, `activities/${Date.now()}-${data.image.name}`);
+          const snapshot = await uploadBytes(imageRef, data.image);
+          imageUrl = await getDownloadURL(snapshot.ref);
+          console.log("Image uploaded:", imageUrl);
+        } catch (error) {
+          console.error("Image upload failed:", error);
+          throw new Error("Failed to upload image");
+        }
       }
 
       const activityData = {

@@ -20,7 +20,7 @@ const defaultConfig = {
   apiKey: "AIzaSyCopx5Hk7QK3JkyrVU9IWYJuERPn7vH43E",
   authDomain: "kingdomrunnersdv1.firebaseapp.com",
   projectId: "kingdomrunnersdv1",
-  storageBucket: "kingdomrunnersdv1.appspot.com",
+  storageBucket: "kingdomrunnersdv1",
   messagingSenderId: "626559745548",
   appId: "1:626559745548:web:3e2f5d7498f7e3beb1f829",
   measurementId: "G-0G8N8DZWHW"

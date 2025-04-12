@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "deploy": "npm run build && firebase deploy",
-    "deploy:rules": "firebase deploy --only firestore:rules,storage:rules"
+    "deploy:rules": "firebase deploy --only firestore:rules,storage:rules",
+    "configure-cors": "npx tsx scripts/configure-cors.ts"
   },
   "dependencies": {
     "@firebase/app": "^0.11.4",
