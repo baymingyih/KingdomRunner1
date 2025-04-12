@@ -1,4 +1,4 @@
- use import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/init';
 
 export class StorageError extends Error {
