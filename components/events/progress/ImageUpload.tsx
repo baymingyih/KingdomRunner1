@@ -23,7 +23,7 @@ export const ImageUpload = forwardRef<HTMLInputElement, ImageUploadProps>(
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        form.setValue('image', file);
+        form.setValue('images', [file]);
         if (onChange) onChange(file);
         
         const reader = new FileReader();
@@ -35,14 +35,14 @@ export const ImageUpload = forwardRef<HTMLInputElement, ImageUploadProps>(
     };
 
     const removeImage = () => {
-      form.setValue('image', undefined);
+      form.setValue('images', []);
       if (onChange) onChange(null);
       setPreview(null);
     };
 
     return (
       <FormField
-        name="image"
+        name="images"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Photo (optional)</FormLabel>
@@ -68,7 +68,7 @@ export const ImageUpload = forwardRef<HTMLInputElement, ImageUploadProps>(
                       type="button"
                       className="absolute top-2 right-2"
                       onClick={() => {
-                        form.setValue('image', undefined);
+                        form.setValue('images', []);
                         setPreview(null);
                         if (onChange) onChange(null);
                       }}

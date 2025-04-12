@@ -26,34 +26,29 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
       minutes: '',
       location: '',
       notes: '',
-      image: undefined
+      images: []
     },
     mode: "onSubmit"
   });
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
-  // Clean up preview URL when component unmounts
+  // Clean up preview URLs when component unmounts
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
     };
-  }, [previewUrl]);
+  }, [previewUrls]);
 
-  const handleImageChange = (file: File | null) => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
+  const handleImageChange = (files: File[]) => {
+    // Clean up old preview URLs
+    previewUrls.forEach(url => URL.revokeObjectURL(url));
     
-    if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setPreviewUrl(null);
-    }
+    // Create new preview URLs
+    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+    setPreviewUrls(newPreviewUrls);
     
-    return file;
+    return files;
   };
 
   return (
@@ -156,42 +151,66 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
             />
 
             <FormField
-              name="image"
-              render={({ field: { value, onChange, ...field } }) => (
+              name="images"
+              render={({ field: { value = [], onChange, ...field } }) => (
                 <FormItem>
-                  <FormLabel>Activity Image (optional)</FormLabel>
+                  <FormLabel>Activity Images (optional)</FormLabel>
                   <FormControl>
                     <div className="space-y-4">
                       <div className="flex items-center gap-4">
                         <Input
                           type="file"
                           accept="image/jpeg,image/png,image/webp"
+                          multiple
                           disabled={submitting}
                           onChange={(e) => {
-                            const file = e.target.files?.[0] || null;
-                            onChange(handleImageChange(file));
+                            const newFiles = Array.from(e.target.files || []);
+                            const updatedFiles = [...value, ...newFiles];
+                            onChange(updatedFiles);
+                            handleImageChange(updatedFiles);
                           }}
                           {...field}
                         />
-                        {value && (
+                        {value.length > 0 && (
                           <Button
                             type="button"
                             className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 w-10 p-0"
                             onClick={() => {
-                              onChange(handleImageChange(null));
+                              onChange([]);
+                              handleImageChange([]);
                             }}
                           >
                             <X className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
-                      {previewUrl && (
-                        <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
-                          <img
-                            src={previewUrl}
-                            alt="Activity preview"
-                            className="h-full w-full object-cover"
-                          />
+                      {previewUrls.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {value.map((file: File, index: number) => (
+                            <div key={index} className="relative aspect-square overflow-hidden rounded-lg border">
+                              <img
+                                src={previewUrls[index]}
+                                alt={`Preview ${index + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full bg-background hover:bg-accent flex items-center justify-center"
+                                onClick={() => {
+                                  const newFiles = [...value];
+                                  newFiles.splice(index, 1);
+                                  onChange(newFiles);
+                                  
+                                  const newPreviewUrls = [...previewUrls];
+                                  URL.revokeObjectURL(newPreviewUrls[index]);
+                                  newPreviewUrls.splice(index, 1);
+                                  setPreviewUrls(newPreviewUrls);
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>

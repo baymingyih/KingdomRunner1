@@ -36,7 +36,7 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
       minutes: 0,
       location: '',
       notes: '',
-      image: undefined
+      images: []
     }
   });
   
@@ -76,7 +76,7 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
         minutes: data.minutes.toString(),
         location: data.location,
         notes: data.notes,
-        image: data.image
+        image: data.images?.[0]
       });
       
       toast({
@@ -189,7 +189,7 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
             />
 
             <FormField
-              name="image"
+              name="images"
               render={({ field: { value, onChange, ...field } }) => (
                 <FormItem>
                   <FormLabel>Activity Image (optional)</FormLabel>
@@ -202,7 +202,15 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
                           disabled={isSubmitting}
                           onChange={(e) => {
                             const file = e.target.files?.[0] || null;
-                            onChange(handleImageChange(file));
+                            if (file) {
+                              form.setValue('images', [file]);
+                              onChange([file]);
+                              handleImageChange(file);
+                            } else {
+                              form.setValue('images', []);
+                              onChange([]);
+                              handleImageChange(null);
+                            }
                           }}
                           {...field}
                         />
@@ -211,7 +219,9 @@ export function ActivityForm({ eventId, userId, onSuccess }: ActivityFormProps) 
                             type="button"
                             className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 w-10 p-0"
                             onClick={() => {
-                              onChange(handleImageChange(null));
+                              form.setValue('images', []);
+                              onChange([]);
+                              handleImageChange(null);
                             }}
                           >
                             <X className="h-4 w-4" />

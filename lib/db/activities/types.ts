@@ -9,6 +9,8 @@ export interface Activity {
   location: string;
   notes?: string | null;
   timestamp: Date;
+  imageUrl?: string;
+  imageUrls?: string[];
 }
 
 export interface ActivityInput {

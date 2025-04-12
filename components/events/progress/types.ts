@@ -11,5 +11,5 @@ export interface ActivityFormData {
   minutes: string;
   location: string;
   notes?: string;
-  image?: File;
+  images?: File[];
 }

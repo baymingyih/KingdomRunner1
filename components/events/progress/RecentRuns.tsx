@@ -62,13 +62,26 @@ export function RecentRuns({ activities }: RecentRunsProps) {
                       {activity.notes}
                     </p>
                   )}
-                  {activity.imageUrl && (
-                    <div className="mt-2 relative aspect-video w-full overflow-hidden rounded-lg border">
-                      <img
-                        src={activity.imageUrl}
-                        alt="Activity"
-                        className="h-full w-full object-cover"
-                      />
+                  {(activity.imageUrl || activity.imageUrls) && (
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      {activity.imageUrl && (
+                        <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                          <img
+                            src={activity.imageUrl}
+                            alt="Activity"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
+                      {activity.imageUrls?.map((url, index) => (
+                        <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                          <img
+                            src={url}
+                            alt={`Activity ${index + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ))}
                     </div>
                   )}
                 </CardContent>

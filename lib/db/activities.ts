@@ -24,6 +24,7 @@ export interface Activity {
   location: string;
   notes?: string;
   imageUrl?: string;
+  imageUrls?: string[];
   timestamp: Date;
   userAvatar?: string;
   userName?: string;
@@ -38,16 +39,27 @@ export interface ActivityInput {
   location: string;
   notes?: string;
   image?: File | null;
+  images?: File[];
 }
 
 export async function logActivity(input: ActivityInput): Promise<Activity> {
   try {
     let imageUrl: string | undefined;
+    let imageUrls: string[] = [];
 
-    // Handle image upload if present
+    // Handle single image upload if present
     if (input.image instanceof File) {
       const activityId = uuidv4();
       imageUrl = await uploadActivityImage(input.image, input.userId, activityId);
+    }
+
+    // Handle multiple image uploads if present
+    if (input.images && input.images.length > 0) {
+      const activityId = uuidv4();
+      const uploadPromises = input.images.map(async (image, index) => {
+        return await uploadActivityImage(image, input.userId, `${activityId}-${index}`);
+      });
+      imageUrls = await Promise.all(uploadPromises);
     }
 
     // Fetch user data to get the avatar
@@ -82,6 +94,9 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
     }
     if (imageUrl) {
       activityData.imageUrl = imageUrl;
+    }
+    if (imageUrls.length > 0) {
+      activityData.imageUrls = imageUrls;
     }
 
     const docRef = await addDoc(collection(db, 'activities'), activityData);
@@ -126,9 +141,12 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
           timestamp: activityData.timestamp.toDate(),
         };
         
-        // Include imageUrl if it exists
+        // Include imageUrl and imageUrls if they exist
         if (activityData.imageUrl) {
           result.imageUrl = activityData.imageUrl;
+        }
+        if (activityData.imageUrls) {
+          result.imageUrls = activityData.imageUrls;
         }
         
         // Only add user data if it exists
@@ -158,9 +176,12 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
           timestamp: activityData.timestamp.toDate(),
         };
         
-        // Include imageUrl if it exists
+        // Include imageUrl and imageUrls if they exist
         if (activityData.imageUrl) {
           result.imageUrl = activityData.imageUrl;
+        }
+        if (activityData.imageUrls) {
+          result.imageUrls = activityData.imageUrls;
         }
         
         // Include notes if they exist
@@ -207,6 +228,9 @@ export async function getUserActivities(userId: string): Promise<Activity[]> {
       // Include optional fields if they exist
       if (data.imageUrl) {
         result.imageUrl = data.imageUrl;
+      }
+      if (data.imageUrls) {
+        result.imageUrls = data.imageUrls;
       }
       if (data.notes) {
         result.notes = data.notes;

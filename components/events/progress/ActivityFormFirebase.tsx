@@ -15,7 +15,8 @@ import type { ActivityFormData } from './types'; // Assuming you have types
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { app } from '@/lib/firebase/init'; // Assuming you have firebaseApp initialized
+import { logActivity } from '@/lib/db/activities';
+import { app } from '@/lib/firebase/init';
 
 interface ActivityFormFirebaseProps {
   onSubmitSuccess?: () => void; // Optional callback for successful submission
@@ -32,7 +33,7 @@ export function ActivityFormFirebase({ onSubmitSuccess, onError }: ActivityFormF
       minutes: '',
       location: '',
       notes: '',
-      image: undefined, // Changed default to undefined
+      images: []
     },
     mode: "onSubmit"
   });
@@ -42,32 +43,25 @@ export function ActivityFormFirebase({ onSubmitSuccess, onError }: ActivityFormF
     try {
       console.log("Form data:", data);
 
-      const storage = getStorage(app);
-      const firestoreDb = getFirestore(app);
+      // Get user ID and event ID (you'll need to get these from your auth context or props)
+      const userId = "user123"; // Replace with actual user ID
+      const eventId = "event123"; // Replace with actual event ID
 
-      let imageUrl = null;
-      if (data.image) {
-        try {
-          const imageRef = ref(storage, `activities/${Date.now()}-${data.image.name}`);
-          const snapshot = await uploadBytes(imageRef, data.image);
-          imageUrl = await getDownloadURL(snapshot.ref);
-          console.log("Image uploaded:", imageUrl);
-        } catch (error) {
-          console.error("Image upload failed:", error);
-          throw new Error("Failed to upload image");
-        }
-      }
-
-      const activityData = {
-        ...data,
-        imageUrl: imageUrl,
-        timestamp: new Date(),
+      // Prepare activity input
+      const activityInput = {
+        userId,
+        eventId,
+        distance: data.distance,
+        hours: data.hours || "0",
+        minutes: data.minutes,
+        location: data.location,
+        notes: data.notes,
+        images: data.images
       };
-      delete activityData.image; // Remove File object before storing in Firestore
 
-      const activitiesCollection = collection(firestoreDb, 'activities');
-      const docRef = await addDoc(activitiesCollection, activityData);
-      console.log("Activity logged with ID:", docRef.id);
+      // Log the activity using our function
+      const result = await logActivity(activityInput);
+      console.log("Activity logged with ID:", result.id);
 
       setIsSubmitting(false);
       if (onSubmitSuccess) {
@@ -182,39 +176,56 @@ export function ActivityFormFirebase({ onSubmitSuccess, onError }: ActivityFormF
             />
 
             <FormField
-              name="image"
-              render={({ field: { value, onChange, ...field } }) => (
+              name="images"
+              render={({ field: { value = [], onChange, ...field } }) => (
                 <FormItem>
-                  <FormLabel>Activity Image (optional)</FormLabel>
+                  <FormLabel>Activity Images (optional)</FormLabel>
                   <FormControl>
                     <div className="space-y-4">
                       <div className="flex items-center gap-4">
                         <Input
                           type="file"
                           accept="image/jpeg,image/png,image/webp"
+                          multiple
                           disabled={isSubmitting}
                           onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            onChange(file);
+                            const newFiles = Array.from(e.target.files || []);
+                            const updatedFiles = [...value, ...newFiles];
+                            onChange(updatedFiles);
                           }}
                           {...field}
                         />
-                        {value && (
+                        {value.length > 0 && (
                           <Button
                             type="button"
-                            onClick={() => onChange(null)}
+                            onClick={() => onChange([])}
                           >
                             <X className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
-                      {value && (
-                        <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
-                          <img
-                            src={value instanceof File ? URL.createObjectURL(value) : value}
-                            alt="Activity preview"
-                            className="h-full w-full object-cover"
-                          />
+                      {value.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {value.map((file: File, index: number) => (
+                            <div key={index} className="relative aspect-square overflow-hidden rounded-lg border">
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={`Preview ${index + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full bg-background hover:bg-accent flex items-center justify-center"
+                                onClick={() => {
+                                  const newFiles = [...value];
+                                  newFiles.splice(index, 1);
+                                  onChange(newFiles);
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>

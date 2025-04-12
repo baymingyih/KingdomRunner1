@@ -64,14 +64,18 @@ export function ActivityList({ activities }: ActivityListProps) {
                     </p>
                   )}
 
-                  {activity.imageUrl && (
-                    <div className="relative w-full h-48 mt-4">
-                      <Image
-                        src={activity.imageUrl}
-                        alt="Activity photo"
-                        fill
-                        className="object-cover rounded-md"
-                      />
+                  {activity.imageUrls && activity.imageUrls.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {activity.imageUrls?.map((url, index) => (
+                        <div key={index} className="relative aspect-square">
+                          <Image
+                            src={url}
+                            alt={`Activity photo ${index + 1}`}
+                            fill
+                            className="object-cover rounded-md"
+                          />
+                        </div>
+                      ))}
                     </div>
                   )}
                 </CardContent>
