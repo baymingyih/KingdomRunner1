@@ -91,10 +91,19 @@ const SelectItem = React.forwardRef<
 ));
 SelectItem.displayName = 'SelectItem';
 
+const SelectValue = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Value>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Value>
+>((props, ref) => (
+  <SelectPrimitive.Value ref={ref} {...props} />
+));
+SelectValue.displayName = 'SelectValue';
+
 export {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectValue,
   SelectPrimitive as SelectPrimitive
 };
