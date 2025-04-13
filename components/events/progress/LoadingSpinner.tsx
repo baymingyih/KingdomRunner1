@@ -1,11 +1,10 @@
 "use client"
 
-import { Loader2 } from 'lucide-react';
-
 export function LoadingSpinner() {
   return (
-    <div className="flex justify-center items-center h-[200px]">
-      <Loader2 className="h-8 w-8 animate-spin" />
+    <div className="flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <span className="ml-2 text-muted-foreground">Loading...</span>
     </div>
   );
 }

@@ -24,16 +24,17 @@ service cloud.firestore {
       // Validate activity data
       function isValidActivity() {
         let data = request.resource.data;
-        return data.distance is number &&
-               data.duration is number &&
+        return data.userId is string &&
+               data.eventId is string &&
+               (data.distance is number || data.distance is string) &&
+               (data.duration is number || data.duration is string) &&
                data.location is string &&
                (!('imageUrl' in data) || data.imageUrl is string) &&
-               (!('notes' in data) || data.notes is string);
+               (!('notes' in data) || data.notes is string || data.notes == null);
       }
       
       allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      isValidActivity();
+                      request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
@@ -46,6 +47,21 @@ service cloud.firestore {
     // Strava tokens
     match /stravaTokens/{userId} {
       allow read, write: if isOwner(userId);
+    }
+    
+    // Activity social features (likes, comments)
+    match /activitySocial/{activityId} {
+      allow read: if isAuthenticated();
+      
+      // Validate social data
+      function isValidSocialData() {
+        let data = request.resource.data;
+        return (!('likes' in data) || data.likes is list) &&
+               (!('comments' in data) || data.comments is list);
+      }
+      
+      // Allow creation and updates for all authenticated users
+      allow create, update: if isAuthenticated();
     }
   }
 }

@@ -48,10 +48,15 @@ export interface Event {
 }
 
 // Mock data (in a real app, this would come from an API/database)
+// Function to get an event by ID
+export function getEventById(id: number): Event | undefined {
+  return events.find(event => event.id === id);
+}
+
 export const events: Event[] = [
   { 
     id: 1, 
-    name: "Global Unity 5K", 
+    name: "FCA East Global Conference Hong Kong", 
     startDate: "2023-11-15",
     endDate: "2023-11-20",
     theme: "Unity in Diversity", 

@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventLeaderboard } from './EventLeaderboard';
 import { EventPrayerGuide } from './EventPrayerGuide';
-import { EventPrayers } from './EventPrayers';
+import { EventSocialWall } from './EventSocialWall';
 import { EventUserProgress } from './EventUserProgress';
 import { EventHero } from './EventHero';
 import { EventOverview } from './EventOverview';
@@ -43,7 +43,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="prayer-guide">Prayer Guide</TabsTrigger>
                 <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-                <TabsTrigger value="prayers">Prayers</TabsTrigger>
+                <TabsTrigger value="social-wall">Social Wall</TabsTrigger>
                 {user && <TabsTrigger value="my-progress">My Progress</TabsTrigger>}
               </TabsList>
 
@@ -68,8 +68,8 @@ export default function EventDetailClient({ event }: { event: Event }) {
                     <EventLeaderboard leaderboard={event.leaderboard} />
                   </TabsContent>
 
-                  <TabsContent value="prayers">
-                    <EventPrayers prayers={event.prayers} />
+                  <TabsContent value="social-wall">
+                    <EventSocialWall eventId={event.id} />
                   </TabsContent>
 
                   {user && (

@@ -8,7 +8,8 @@ import {
   Timestamp,
   doc,
   getDoc,
-  deleteDoc
+  deleteDoc,
+  limit as limitQuery
 } from 'firebase/firestore';
 import { db } from '../firebase/init';
 import { uploadActivityImage } from '../storage/uploadImage';
@@ -51,16 +52,24 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
     // Handle single image upload if present
     if (input.image instanceof File) {
       const activityId = uuidv4();
-      imageUrl = await uploadActivityImage(input.image, input.userId, activityId);
+      try {
+        imageUrl = await uploadActivityImage(input.image, input.userId, activityId);
+      } catch (error) {
+        console.warn('Error uploading image, continuing without image:', error);
+      }
     }
 
     // Handle multiple image uploads if present
     if (input.images && input.images.length > 0) {
       const activityId = uuidv4();
-      const uploadPromises = input.images.map(async (image, index) => {
-        return await uploadActivityImage(image, input.userId, `${activityId}-${index}`);
-      });
-      imageUrls = await Promise.all(uploadPromises);
+      try {
+        const uploadPromises = input.images.map(async (image, index) => {
+          return await uploadActivityImage(image, input.userId, `${activityId}-${index}`);
+        });
+        imageUrls = await Promise.all(uploadPromises);
+      } catch (error) {
+        console.warn('Error uploading multiple images, continuing without images:', error);
+      }
     }
 
     // Fetch user data to get the avatar
@@ -112,6 +121,7 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
     throw new Error('Failed to load activities');
   }
 }
+
 export async function getEventActivities(eventId: string): Promise<Activity[]> {
   try {
     const activitiesRef = collection(db, 'activities');
@@ -205,6 +215,80 @@ export async function deleteActivity(activityId: string): Promise<void> {
   } catch (error) {
     console.error('Error deleting activity:', error);
     throw new Error('Failed to delete activity');
+  }
+}
+
+export async function getAllActivities(limit: number = 10): Promise<Activity[]> {
+  try {
+    const activitiesRef = collection(db, 'activities');
+    const q = query(
+      activitiesRef,
+      orderBy('timestamp', 'desc'),
+      limitQuery(limit)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    const activities = querySnapshot.docs.map(docSnapshot => {
+      const data = docSnapshot.data();
+      
+      // Check if required fields exist
+      if (!data.userId || !data.eventId || !data.location) {
+        return null; // Skip this document
+      }
+      
+      // Calculate duration from hours and minutes
+      const durationInMinutes = (data.hours || 0) * 60 + (data.minutes || 0);
+      
+      // Handle missing or invalid timestamp
+      let timestamp = new Date();
+      try {
+        if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+          timestamp = data.timestamp.toDate();
+        } else if (data.timestamp) {
+          timestamp = new Date(data.timestamp);
+        }
+      } catch (error) {
+        // Use current date if timestamp parsing fails
+      }
+      
+      const result: Activity = {
+        id: docSnapshot.id,
+        userId: data.userId,
+        eventId: data.eventId,
+        distance: data.distance || 0,
+        hours: data.hours || 0,
+        minutes: data.minutes || 0,
+        duration: durationInMinutes,
+        location: data.location,
+        timestamp: timestamp,
+      };
+      
+      // Include optional fields if they exist
+      if (data.imageUrl) {
+        result.imageUrl = data.imageUrl;
+      }
+      if (data.imageUrls) {
+        result.imageUrls = data.imageUrls;
+      }
+      if (data.notes) {
+        result.notes = data.notes;
+      }
+      if (data.userAvatar) {
+        result.userAvatar = data.userAvatar;
+      }
+      if (data.userName) {
+        result.userName = data.userName;
+      }
+      
+      return result;
+    });
+    
+    // Filter out any null values
+    return activities.filter((activity): activity is Activity => activity !== null);
+  } catch (error) {
+    console.error('Error getting all activities:', error);
+    throw new Error('Failed to load activities');
   }
 }
 
