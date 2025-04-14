@@ -17,7 +17,7 @@ export function EventHero({ event }: { event: Event }) {
     <div className="relative w-full h-[500px] rounded-xl overflow-hidden mb-8">
       <div className="absolute inset-0 bg-black/60 z-10" />
       <Image
-        src={event.image}
+        src="https://firebasestorage.googleapis.com/v0/b/kingdomrunnersdv1/o/events%2F1%2Fcover%2F1744597774563-WhatsApp%20Image%202025-04-13%20at%203.06.29%20PM.jpeg?alt=media&token=93d482a6-854f-4432-9bf8-201570f4f256"
         alt={event.name}
         fill
         className="object-cover"

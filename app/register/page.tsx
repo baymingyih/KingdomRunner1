@@ -114,25 +114,26 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="max-w-xl mx-auto">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
+      <Card className="w-full sm:max-w-xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Join Kingdom Runners</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl text-center">Join Kingdom Runners</CardTitle>
         </CardHeader>
         <CardContent>
           <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
               {step === 1 && <EmailStep form={form} />}
               {step === 2 && <NameStep form={form} />}
               {step === 3 && <CountryStep form={form} />}
 
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 {step > 1 && (
                   <Button 
                     type="button" 
                     onClick={() => setStep(step - 1)}
                     disabled={isSubmitting}
+                    className="py-2"
                   >
                     Previous
                   </Button>
@@ -142,6 +143,7 @@ export default function RegisterPage() {
                     type="button"
                     onClick={handleNext}
                     disabled={isSubmitting}
+                    className="py-2"
                   >
                     Next
                   </Button>
@@ -158,7 +160,7 @@ export default function RegisterPage() {
             </form>
           </FormProvider>
         </CardContent>
-        </Card>
-      </div>
-    );
+      </Card>
+    </div>
+  );
 }

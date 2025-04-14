@@ -53,6 +53,21 @@ export function getEventById(id: number): Event | undefined {
   return events.find(event => event.id === id);
 }
 
+export function updateEvent(updatedEvent: Event): Promise<Event> {
+  return new Promise((resolve, reject) => {
+    try {
+      const index = events.findIndex(e => e.id === updatedEvent.id);
+      if (index === -1) {
+        throw new Error('Event not found');
+      }
+      events[index] = updatedEvent;
+      resolve(updatedEvent);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 export const events: Event[] = [
   { 
     id: 1, 
@@ -60,7 +75,7 @@ export const events: Event[] = [
     startDate: "2023-11-15",
     endDate: "2023-11-20",
     theme: "Unity in Diversity", 
-    description: "Join runners worldwide in this 5K celebrating our global community. This virtual run can be completed anywhere in the world during the event period. Share your journey, connect with fellow runners, and unite in prayer.",
+    description: "#Glory Chasers 100km Challenge\nJoin the FCA East Global Conference's Glory Chasers challenge, a 40-day journey of faith, fitness, and fellowship!\nBe part of this inspiring journey, connecting with fellow FCA teammates and growing in faith together! Share your progress, experiences, and reflections with the community, and let's chase glory together!",
     image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80",
     prayerGuide: [
       {

@@ -137,10 +137,10 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes (optional)</FormLabel>
+                  <FormLabel>Reflection</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Share your experience..."
+                      placeholder="Share your reflections..."
                       disabled={submitting}
                       {...field}
                     />

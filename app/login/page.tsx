@@ -65,11 +65,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="max-w-md mx-auto">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
+      <Card className="w-full sm:max-w-md mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-xl sm:text-2xl text-center">Welcome Back</CardTitle>
+          <CardDescription className="text-center text-sm sm:text-base">
             Sign in to your Kingdom Runners account
           </CardDescription>
         </CardHeader>
@@ -81,7 +81,7 @@ export default function LoginPage() {
           )}
           
           <FormProvider {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
               <FormField
                 name="email"
                 label="Email"
@@ -106,7 +106,7 @@ export default function LoginPage() {
                   />
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full py-2" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -119,8 +119,8 @@ export default function LoginPage() {
             </form>
           </FormProvider>
           
-          <div className="mt-6 text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
+          <div className="mt-4 sm:mt-6 text-center space-y-2">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Don't have an account?{' '}
               <Link href="/register" className="text-primary hover:underline">
                 Register here

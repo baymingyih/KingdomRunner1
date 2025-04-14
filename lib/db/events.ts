@@ -65,6 +65,18 @@ export async function getUpcomingEvents(maxResults = 3) {
   }
 }
 
+export async function updateEvent(eventId: string, eventData: Partial<Event>) {
+  try {
+    const eventRef = doc(db, 'events', eventId);
+    await updateDoc(eventRef, eventData);
+    const updatedDoc = await getDoc(eventRef);
+    return { id: updatedDoc.id, ...updatedDoc.data() } as Event;
+  } catch (error) {
+    console.error('Error updating event:', error);
+    throw error;
+  }
+}
+
 export async function updateEventParticipants(eventId: string, increment: number) {
   try {
     const eventRef = doc(db, 'events', eventId);

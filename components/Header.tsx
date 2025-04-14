@@ -102,7 +102,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-3 md:py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-primary">
             Kingdom Runners
@@ -137,14 +137,14 @@ const Header = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <SheetHeader>
-                  <SheetTitle>Navigation Menu</SheetTitle>
+                  <SheetTitle className="px-4">Menu</SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col space-y-4 mt-8">
+                <nav className="flex flex-col space-y-2 px-4 mt-6">
                   {navItems.map((item) => (
                     <NavLink
                       key={item.href}
                       {...item}
-                      className="text-lg py-2"
+                      className="text-lg py-3 px-4 rounded-lg hover:bg-accent"
                       onClick={() => setIsOpen(false)}
                     />
                   ))}

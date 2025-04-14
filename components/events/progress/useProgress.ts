@@ -11,7 +11,7 @@ export function useProgress(userId: string | undefined) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [stats, setStats] = useState<ProgressStats>({
     totalDistance: 0,
-    targetDistance: 42.2,
+    targetDistance: 100,
     totalActivities: 0,
     targetActivities: 21
   });
@@ -22,7 +22,7 @@ export function useProgress(userId: string | undefined) {
     const totalDistance = activities.reduce((sum, activity) => sum + activity.distance, 0);
     return {
       totalDistance,
-      targetDistance: 42.2,
+      targetDistance: 100,
       totalActivities: activities.length,
       targetActivities: 21
     };

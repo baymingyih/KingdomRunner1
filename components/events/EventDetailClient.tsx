@@ -37,11 +37,10 @@ export default function EventDetailClient({ event }: { event: Event }) {
         <EventHero event={event} />
 
         <Card className="mb-8">
-          <CardContent className="p-6">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-              <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-4 bg-transparent">
+          <CardContent className="p-4 sm:p-6">
+            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-8">
+              <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 bg-transparent">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="prayer-guide">Prayer Guide</TabsTrigger>
                 <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
                 <TabsTrigger value="social-wall">Social Wall</TabsTrigger>
                 {user && <TabsTrigger value="my-progress">My Progress</TabsTrigger>}
@@ -55,13 +54,10 @@ export default function EventDetailClient({ event }: { event: Event }) {
                   exit="exit"
                   variants={fadeIn}
                   transition={{ duration: 0.3 }}
+                  className="mt-4 sm:mt-6"
                 >
                   <TabsContent value="overview">
                     <EventOverview event={event} />
-                  </TabsContent>
-
-                  <TabsContent value="prayer-guide">
-                    <EventPrayerGuide prayerGuide={event.prayerGuide} />
                   </TabsContent>
 
                   <TabsContent value="leaderboard">
