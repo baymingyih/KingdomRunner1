@@ -45,7 +45,9 @@ export default function LoginPage() {
     setError(null);
     
     try {
-      await loginUser(values.email, values.password);
+      const user = await loginUser(values.email, values.password);
+      // Wait briefly for auth state to propagate
+      await new Promise(resolve => setTimeout(resolve, 500));
       toast({
         title: "Login Successful",
         description: "Welcome back to Kingdom Runners!",

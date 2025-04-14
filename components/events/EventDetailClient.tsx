@@ -45,7 +45,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
               <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 bg-transparent">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-                <TabsTrigger value="social-wall">Social Wall</TabsTrigger>
+                <TabsTrigger value="encourage-wall">Encourage Wall</TabsTrigger>
                 {user && <TabsTrigger value="my-progress">My Progress</TabsTrigger>}
               </TabsList>
 
@@ -67,7 +67,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
                     <EventLeaderboard leaderboard={event.leaderboard} />
                   </TabsContent>
 
-                  <TabsContent value="social-wall">
+                  <TabsContent value="encourage-wall">
                     <EventSocialWall eventId={event.id} />
                   </TabsContent>
 

@@ -152,6 +152,11 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
           timestamp: activityData.timestamp.toDate(),
         };
         
+        // Include notes if they exist
+        if (activityData.notes) {
+          result.notes = activityData.notes;
+        }
+        
         // Include imageUrl and imageUrls if they exist
         if (activityData.imageUrl) {
           result.imageUrl = activityData.imageUrl;

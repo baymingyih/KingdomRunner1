@@ -117,7 +117,7 @@ export default function RegisterPage() {
     <div className="container mx-auto px-4 py-6 sm:py-8">
       <Card className="w-full sm:max-w-xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-xl sm:text-2xl text-center">Join Kingdom Runners</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl text-center">Register</CardTitle>
         </CardHeader>
         <CardContent>
           <FormProvider {...form}>

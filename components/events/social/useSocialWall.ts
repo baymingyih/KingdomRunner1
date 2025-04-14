@@ -120,13 +120,14 @@ export function useSocialWall(eventId: string) {
     try {
       const newActivity = await logActivity(data);
       
-      // Add to local state
+      // Add to local state - ensure all fields including notes are preserved
       setActivities(prev => [{
         ...newActivity,
         likes: [],
         likeCount: 0,
         comments: [],
-        commentCount: 0
+        commentCount: 0,
+        notes: data.notes || undefined
       }, ...prev]);
       
       toast({

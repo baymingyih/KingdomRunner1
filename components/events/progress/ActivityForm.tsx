@@ -54,7 +54,7 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Log Activity</CardTitle>
+        <CardTitle>Share a new activity</CardTitle>
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
@@ -229,10 +229,10 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging Activity...
+                  Sharing activity...
                 </>
               ) : (
-                'Log Activity'
+                'Share a new activity'
               )}
             </Button>
           </div>
