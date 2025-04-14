@@ -72,11 +72,11 @@ export const events: Event[] = [
   { 
     id: 1, 
     name: "FCA East Global Conference Hong Kong", 
-    startDate: "2023-11-15",
-    endDate: "2023-11-20",
+    startDate: "2025-04-14",
+    endDate: "2025-05-24",
     theme: "Unity in Diversity", 
     description: "#Glory Chasers 100km Challenge\nJoin the FCA East Global Conference's Glory Chasers challenge, a 40-day journey of faith, fitness, and fellowship!\nBe part of this inspiring journey, connecting with fellow FCA teammates and growing in faith together! Share your progress, experiences, and reflections with the community, and let's chase glory together!",
-    image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80",
+    image: "https://firebasestorage.googleapis.com/v0/b/kingdomrunnersdv1/o/tempimg%2FWhatsApp%20Image%202025-04-14%20at%204.54.17%20PM.jpeg?alt=media&token=17a282d4-3133-4a12-b9ec-a44723dfca73",
     prayerGuide: [
       {
         day: 1,
@@ -107,31 +107,5 @@ export const events: Event[] = [
       { id: 2, runner: "Liu Wei", content: "Praying for all participants to finish strong!", timestamp: "2023-11-15T11:30:00Z" }
     ],
     participants: 234
-  },
-  { 
-    id: 2, 
-    name: "Marathon of Hope", 
-    startDate: "2023-12-01",
-    endDate: "2023-12-15",
-    theme: "Running for a Cause", 
-    description: "A full marathon dedicated to raising awareness for global issues.",
-    image: "https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800&q=80",
-    prayerGuide: [],
-    leaderboard: [],
-    prayers: [],
-    participants: 156
-  },
-  { 
-    id: 3, 
-    name: "New Year's Resolution Run", 
-    startDate: "2024-01-01",
-    endDate: "2024-01-07",
-    theme: "Fresh Starts", 
-    description: "Start your year right with this motivational 10K run.",
-    image: "https://images.unsplash.com/photo-1486218119243-13883505764c?w=800&q=80",
-    prayerGuide: [],
-    leaderboard: [],
-    prayers: [],
-    participants: 312
   }
 ];

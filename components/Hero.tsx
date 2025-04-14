@@ -8,7 +8,13 @@ export default function Hero() {
   return (
     <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/40" />
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('https://firebasestorage.googleapis.com/v0/b/kingdomrunnersdv1/o/tempimg%2FWhatsApp%20Image%202025-04-14%20at%2010.51.48%20PM.jpeg?alt=media&token=165e7ed4-89a3-462a-882a-cf43b4b68017')"
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40" />
       </div>
       <div className="relative z-10 text-center">
         <motion.h1
@@ -31,13 +37,9 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="space-x-4"
         >
-          <Button className="bg-white text-black hover:bg-gray-100">
-            <Link href="/register">Join for Free</Link>
-          </Button>
-          <Button className="text-white border-white hover:bg-white/10">
-            <Link href="/about">Learn More</Link>
+          <Button className="bg-black/90 text-white hover:bg-black px-6 py-4 text-lg font-medium rounded-md transition-all duration-200 border-2 border-white hover:border-white/80">
+            <Link href="/about">About Us</Link>
           </Button>
         </motion.div>
       </div>

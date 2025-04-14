@@ -2,7 +2,7 @@ import Hero from '@/components/Hero';
 import EventCountdown from '@/components/EventCountdown';
 import DailyPrayer from '@/components/DailyPrayer';
 import FeaturedEvents from '@/components/FeaturedEvents';
-import GuidedPrayers from '@/components/GuidedPrayers';
+import { RunGuide } from '@/components/runs/RunGuide';
 import HomeSocialSection from '@/components/home/HomeSocialSection';
 
 export default function Home() {
@@ -13,8 +13,7 @@ export default function Home() {
         <EventCountdown />
         <HomeSocialSection />
         <DailyPrayer />
-        <GuidedPrayers />
-        <FeaturedEvents />
+        <RunGuide />
       </div>
     </main>
   );

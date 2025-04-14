@@ -4,11 +4,17 @@ import { Button } from '@/components/ui/button';
 import { HomeSocialFeed } from './HomeSocialFeed';
 import { useGlobalSocialWall } from './useGlobalSocialWall';
 import { LoadingSpinner } from '@/components/events/progress/LoadingSpinner';
-import { ErrorDisplay } from '@/components/events/progress/ErrorDisplay';
 import Link from 'next/link';
+import { useAuthContext } from '@/components/auth/AuthProvider';
 
 export default function HomeSocialSection() {
-  const { activities, loading, error } = useGlobalSocialWall(3);
+  const { user } = useAuthContext();
+  const { activities, loading } = useGlobalSocialWall(3);
+
+  // Don't render anything if user is not logged in
+  if (!user) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -20,12 +26,8 @@ export default function HomeSocialSection() {
     );
   }
 
-  if (error) {
-    return (
-      <section className="my-12">
-        <ErrorDisplay error={error} />
-      </section>
-    );
+  if (!activities || activities.length === 0) {
+    return null;
   }
 
   return (

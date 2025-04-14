@@ -1,73 +1,17 @@
 "use client"
 
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button, buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronRight, ChevronLeft, Heart, ArrowLeftIcon } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Heart } from 'lucide-react';
 
-const prayerPoints = [
-  {
-    title: "God's Glory Revealed: The Power of His Presence",
-    prayer: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand. (Isaiah 41:10)",
-    focus: "Meditate on God's promise to be with you and strengthen you in all circumstances."
-  },
-  {
-    title: "Mental Resilience",
-    prayer: "I can do all things through Christ who strengthens me. (Philippians 4:13)",
-    focus: "Pray for mental toughness and focus during challenging runs."
-  },
-  {
-    title: "Community Unity",
-    prayer: "How good and pleasant it is when God's people live together in unity! (Psalm 133:1)",
-    focus: "Pray for our global running community and the bonds we share."
-  },
-  {
-    title: "Purpose in Running",
-    prayer: "Whatever you do, do it all for the glory of God. (1 Corinthians 10:31)",
-    focus: "Pray for clarity in using our running to glorify God."
-  },
-  {
-    title: "Gratitude",
-    prayer: "Give thanks in all circumstances. (1 Thessalonians 5:18)",
-    focus: "Thank God for the ability to run and the joy it brings."
-  }
-];
+const verseOfTheWeek = {
+  title: "God's Glory Revealed: The Power of His Presence",
+  prayer: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand. (Isaiah 41:10)",
+  focus: "Meditate on God's promise to be with you and strengthen you in all circumstances."
+};
 
 export default function DailyPrayer() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
-
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0
-    })
-  };
-
-  const navigate = (newDirection: number) => {
-    setDirection(newDirection);
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = prevIndex + newDirection;
-      if (nextIndex >= prayerPoints.length) return 0;
-      if (nextIndex < 0) return prayerPoints.length - 1;
-      return nextIndex;
-    });
-  };
-
-  const currentPoint = prayerPoints[currentIndex];
-
   return (
     <Card className="my-8">
       <CardHeader>
@@ -77,58 +21,18 @@ export default function DailyPrayer() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative overflow-hidden px-4">
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={currentIndex}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 }
-              }}
-              className="text-center"
-            >
-              <h3 className="text-xl font-semibold mb-4">{currentPoint.title}</h3>
-              <p className="italic mb-4">{currentPoint.prayer}</p>
-              <div className="bg-muted p-4 rounded-lg mb-4">
-                <p className="text-sm text-muted-foreground">{currentPoint.focus}</p>
-              </div>
-              <Link href="/verse-of-the-week" className="inline-block">
-                <Button className={buttonVariants({ variant: 'outline' }) + " w-full"}>
-                  Read Full Article
-                </Button>
-              </Link>
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="flex justify-between mt-6">
-            <Button
-              onClick={() => navigate(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2"
-            >
-              <ArrowLeftIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={() => navigate(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex justify-center gap-1 mt-6">
-            {prayerPoints.map((_, index) => (
-              <div
-                key={index}
-                className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${
-                  index === currentIndex ? 'bg-primary' : 'bg-muted'
-                }`}
-              />
-            ))}
+        <div className="px-4">
+          <div className="text-center">
+            <h3 className="text-xl font-semibold mb-4">{verseOfTheWeek.title}</h3>
+            <p className="italic mb-4">{verseOfTheWeek.prayer}</p>
+            <div className="bg-muted p-4 rounded-lg mb-4">
+              <p className="text-sm text-muted-foreground">{verseOfTheWeek.focus}</p>
+            </div>
+            <Link href="/verse-of-the-week" className="inline-block">
+              <Button className={buttonVariants({ variant: 'outline' }) + " w-full"}>
+                Read Full Article
+              </Button>
+            </Link>
           </div>
         </div>
       </CardContent>

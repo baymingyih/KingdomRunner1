@@ -24,7 +24,7 @@ export function EventOverview({ event }: { event: Event }) {
               <div>
                 <p className="font-medium">Duration</p>
                 <p className="text-sm text-muted-foreground">
-                  {Math.ceil((new Date(event.endDate).getTime() - new Date(event.startDate).getTime()) / (1000 * 60 * 60 * 24))} days
+                  40 days
                 </p>
               </div>
             </div>
@@ -40,7 +40,7 @@ export function EventOverview({ event }: { event: Event }) {
               <div>
                 <p className="font-medium">Community</p>
                 <p className="text-sm text-muted-foreground">
-                  Join {event.participants} runners from around the world
+                  Join Runners-In-Christ from around the world
                 </p>
               </div>
             </div>

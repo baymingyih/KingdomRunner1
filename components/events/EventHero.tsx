@@ -40,11 +40,7 @@ export function EventHero({ event }: { event: Event }) {
         >
           <Badge variant="secondary" className="text-lg py-1.5">
             <Calendar className="w-4 h-4 mr-2" />
-            {startDate.toLocaleDateString('en-GB')} - {endDate.toLocaleDateString('en-GB')}
-          </Badge>
-          <Badge variant="secondary" className="text-lg py-1.5">
-            <Users className="w-4 h-4 mr-2" />
-            {event.participants} Participants
+            14th April to 24th May 2025
           </Badge>
           {isOngoing && (
             <Badge variant="secondary" className="text-lg py-1.5 bg-green-500/10 text-green-500">
@@ -58,19 +54,6 @@ export function EventHero({ event }: { event: Event }) {
               Upcoming Event
             </Badge>
           )}
-        </motion.div>
-        <motion.div 
-          className="flex gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Button className="bg-primary hover:bg-primary/90">
-            Register Now
-          </Button>
-          <Button className="bg-white/10 hover:bg-white/20">
-            Share Event
-          </Button>
         </motion.div>
       </div>
     </div>
