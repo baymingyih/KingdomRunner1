@@ -17,9 +17,9 @@ service cloud.firestore {
       allow update, delete: if isOwner(userId); // Only owner can modify
     }
     
-    // Activities
+    // Activities - allow public read for social wall
     match /activities/{activityId} {
-      allow read: if isAuthenticated();
+      allow read: if true; // Public read access
       
       // Validate activity data
       function isValidActivity() {

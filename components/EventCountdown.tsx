@@ -32,13 +32,13 @@ export default function EventCountdown() {
 
   return (
     <Card className="my-8">
-      <div className="relative w-full aspect-video">
+      <div className="relative w-full aspect-[3/1] md:aspect-[2/1] h-[350px] md:h-[450px] bg-gray-100">
         <Image
           src="https://firebasestorage.googleapis.com/v0/b/kingdomrunnersdv1/o/tempimg%2FWhatsApp%20Image%202025-04-14%20at%204.54.17%20PM.jpeg?alt=media&token=17a282d4-3133-4a12-b9ec-a44723dfca73"
           alt="FCA East Global Conference"
           fill
-          className="object-cover rounded-t-lg"
-          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover object-top rounded-t-lg"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority
         />
       </div>
