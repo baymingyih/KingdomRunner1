@@ -23,12 +23,15 @@ const fadeIn = {
   exit: { opacity: 0, y: -20 }
 };
 
+import { AuthGuard } from '@/components/auth/AuthGuard';
+
 export default function EventDetailClient({ event }: { event: Event }) {
   const [selectedTab, setSelectedTab] = useState("overview");
   const { user } = useAuthContext();
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <AuthGuard>
+      <div className="container mx-auto px-4 py-8">
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
@@ -80,5 +83,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
         </Card>
       </motion.div>
     </div>
+    </AuthGuard>
   );
 }
