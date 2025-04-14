@@ -94,7 +94,7 @@ export default function RegisterPage() {
 
       // Reset form and redirect
       form.reset();
-      router.push('/login');
+      router.push('/events/1');
     } catch (error) {
       toast({
         title: "Registration Failed",

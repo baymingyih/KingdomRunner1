@@ -50,7 +50,7 @@ export default function LoginPage() {
         title: "Login Successful",
         description: "Welcome back to Kingdom Runners!",
       });
-      router.push('/dashboard');
+      router.push('/events/1');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Invalid credentials";
       setError(errorMessage);
