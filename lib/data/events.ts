@@ -71,7 +71,7 @@ export function updateEvent(updatedEvent: Event): Promise<Event> {
 export const events: Event[] = [
   { 
     id: 1, 
-    name: "FCA East Global Conference Hong Kong", 
+    name: "#Glory Chasers - 100KM", 
     startDate: "2025-04-14",
     endDate: "2025-05-24",
     theme: "Unity in Diversity", 
