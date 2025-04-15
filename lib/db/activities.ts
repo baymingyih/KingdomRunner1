@@ -150,6 +150,7 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
           duration: durationInMinutes,
           location: activityData.location,
           timestamp: activityData.timestamp.toDate(),
+          notes: activityData.notes || undefined
         };
         
         // Include imageUrl and imageUrls if they exist

@@ -41,6 +41,17 @@ export function EventSocialWall({ eventId }: EventSocialWallProps) {
     return <ErrorDisplay error={error} />;
   }
 
+  if (activities.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <h3 className="text-lg font-medium mb-2">No activities yet</h3>
+        <p className="text-muted-foreground">
+          Be the first to share your run and reflection!
+        </p>
+      </div>
+    );
+  }
+
   // Sort activities based on active tab
   const sortedActivities = [...activities].sort((a, b) => {
     if (activeTab === 'latest') {

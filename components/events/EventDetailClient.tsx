@@ -26,7 +26,7 @@ const fadeIn = {
 import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export default function EventDetailClient({ event }: { event: Event }) {
-  const [selectedTab, setSelectedTab] = useState("overview");
+  const [selectedTab, setSelectedTab] = useState("social-wall");
   const { user } = useAuthContext();
 
   return (

@@ -61,8 +61,17 @@ export function SocialActivityFeed({
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">No activities have been shared yet.</p>
-          <p className="text-sm mt-2">Be the first to share your run!</p>
+          <p className="text-muted-foreground">No activities with reflections yet.</p>
+          <p className="text-sm mt-2">
+            Share your run and reflection to inspire others!
+          </p>
+          {!currentUser && (
+            <a href="/login">
+              <Button className="mt-4">
+                Sign In to Share
+              </Button>
+            </a>
+          )}
         </CardContent>
       </Card>
     );
@@ -106,8 +115,18 @@ export function SocialActivityFeed({
                       <p className="text-sm text-muted-foreground mt-1">
                         {activity.location}
                       </p>
-                      {activity.notes && (
-                        <p className="mt-2">{activity.notes}</p>
+                      {activity.notes ? (
+                        <div className="mt-3 p-4 bg-muted/20 rounded-lg border border-primary/20 shadow-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                            <h4 className="text-sm font-medium text-primary">Reflection</h4>
+                          </div>
+                          <p className="whitespace-pre-line text-sm">{activity.notes}</p>
+                        </div>
+                      ) : (
+                        <div className="mt-3 text-xs text-muted-foreground italic">
+                          No reflection shared for this activity
+                        </div>
                       )}
                       
                       {activity.imageUrl && (

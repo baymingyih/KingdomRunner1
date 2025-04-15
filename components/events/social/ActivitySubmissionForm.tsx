@@ -171,10 +171,10 @@ export function ActivitySubmissionForm({ eventId, onSubmit }: ActivitySubmission
               <Label htmlFor="notes">Reflection</Label>
               <Textarea
                 id="notes"
-                placeholder="Share your reflections about this run..."
+                placeholder="What did you learn from this run? How did it impact you spiritually or emotionally? Share your thoughts..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[150px]"
               />
             </div>
             
