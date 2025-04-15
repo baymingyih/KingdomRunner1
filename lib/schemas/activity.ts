@@ -22,7 +22,6 @@ export const activitySchema = z.object({
     .max(100, 'Location must be less than 100 characters'),
     
   notes: z.string()
-    .max(500, 'Notes must be less than 500 characters')
     .optional(),
     
   images: z
