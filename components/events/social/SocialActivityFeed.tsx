@@ -110,7 +110,7 @@ export function SocialActivityFeed({
                     
                     <div className="mt-2">
                       <p className="text-lg font-semibold">
-                        {activity.distance.toFixed(1)} km in {Math.floor(activity.duration / 60)} minutes
+                        {activity.distance.toFixed(1)} km in {activity.hours > 0 ? `${activity.hours} hr ${activity.minutes} min` : `${activity.minutes} min`}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
                         {activity.location}
