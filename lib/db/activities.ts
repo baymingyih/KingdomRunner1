@@ -30,6 +30,8 @@ export interface Activity {
   timestamp: Date;
   userAvatar?: string;
   userName?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface ActivityInput {
@@ -75,8 +77,17 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
     // Fetch user data to get the avatar
     const userDoc = await getDoc(doc(db, 'users', input.userId));
     const userData = userDoc.data();
+    console.log('User data from Firestore:', {
+      id: input.userId,
+      firstName: userData?.firstName,
+      lastName: userData?.lastName,
+      name: userData?.name,
+      avatar: userData?.avatar
+    });
     const userAvatar = userData?.avatar;
-    const userName = userData?.name;
+    const userName = (userData?.firstName || userData?.lastName) 
+      ? `${userData.firstName || ''} ${userData.lastName || ''}`.trim()
+      : undefined;
 
     // Create activity data without the File object
     const durationInMinutes = (parseInt(input.hours) || 0) * 60 + (parseInt(input.minutes) || 0);
@@ -165,8 +176,8 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
         if (userData?.avatar !== undefined) {
           result.userAvatar = userData.avatar;
         }
-        if (userData?.name !== undefined) {
-          result.userName = userData.name;
+        if (userData?.firstName !== undefined || userData?.lastName !== undefined) {
+          result.userName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
         }
         
         return result;
@@ -230,7 +241,8 @@ export async function getAllActivities(limit: number = 10): Promise<Activity[]> 
     
     const querySnapshot = await getDocs(q);
     
-    const activities = querySnapshot.docs.map(docSnapshot => {
+    // First, get all the activities
+    const activitiesPromises = querySnapshot.docs.map(async docSnapshot => {
       const data = docSnapshot.data();
       
       // Check if required fields exist
@@ -278,15 +290,66 @@ export async function getAllActivities(limit: number = 10): Promise<Activity[]> 
       if (data.userAvatar) {
         result.userAvatar = data.userAvatar;
       }
-      if (data.userName) {
+      
+      // Try to get user data from the users collection if not already in the activity
+      if (!data.firstName && !data.lastName) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', data.userId));
+          const userData = userDoc.data();
+          
+          if (userData) {
+            console.log('Found user data for activity:', {
+              activityId: docSnapshot.id,
+              userId: data.userId,
+              firstName: userData.firstName,
+              lastName: userData.lastName
+            });
+            
+            // Set firstName and lastName from user data
+            if (userData.firstName) {
+              result.firstName = userData.firstName;
+            }
+            if (userData.lastName) {
+              result.lastName = userData.lastName;
+            }
+          }
+        } catch (error) {
+          console.warn('Error fetching user data for activity:', error);
+        }
+      } else {
+        // Use the firstName and lastName from the activity data if they exist
+        if (data.firstName) {
+          result.firstName = data.firstName;
+        }
+        if (data.lastName) {
+          result.lastName = data.lastName;
+        }
+      }
+      
+      // Set userName based on firstName and lastName
+      if (result.firstName || result.lastName) {
+        result.userName = `${result.firstName || ''} ${result.lastName || ''}`.trim();
+      } else if (data.userName) {
         result.userName = data.userName;
       }
       
       return result;
     });
     
+    // Wait for all promises to resolve
+    const activities = await Promise.all(activitiesPromises);
+    
     // Filter out any null values
-    return activities.filter((activity): activity is Activity => activity !== null);
+    const filteredActivities = activities.filter((activity): activity is Activity => activity !== null);
+    
+    console.log('Final activities data with names:', filteredActivities.map(a => ({
+      id: a.id,
+      userName: a.userName,
+      firstName: a.firstName,
+      lastName: a.lastName
+    })));
+    
+    return filteredActivities;
   } catch (error) {
     console.error('Error getting all activities:', error);
     throw new Error('Failed to load activities');

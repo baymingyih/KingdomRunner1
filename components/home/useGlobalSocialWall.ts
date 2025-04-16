@@ -14,6 +14,8 @@ export interface GlobalSocialActivity extends Activity {
   likeCount?: number;
   comments?: any[];
   commentCount?: number;
+  firstName?: string;
+  lastName?: string;
 }
 
 export function useGlobalSocialWall(limit: number = 10) {
@@ -30,13 +32,24 @@ export function useGlobalSocialWall(limit: number = 10) {
       const allActivities = await getAllActivities(limit);
       
       // Transform activities to include basic info
-      const socialActivities: GlobalSocialActivity[] = allActivities.map((activity) => ({
-        ...activity,
-        likes: [],
-        likeCount: 0,
-        comments: [],
-        commentCount: 0
-      }));
+      const socialActivities: GlobalSocialActivity[] = allActivities.map((activity) => {
+        // Log each activity's user data for debugging
+        console.log('Raw activity user data:', {
+          id: activity.id,
+          userId: activity.userId,
+          userName: activity.userName,
+          firstName: activity.firstName,
+          lastName: activity.lastName
+        });
+        
+        return {
+          ...activity,
+          likes: [],
+          likeCount: 0,
+          comments: [],
+          commentCount: 0
+        };
+      });
       
       // Only try to fetch event names if we have a user (authenticated)
       if (user) {
@@ -54,6 +67,15 @@ export function useGlobalSocialWall(limit: number = 10) {
         );
       }
       
+      console.log('Fetched activities with complete user data:', socialActivities.map(a => ({
+        id: a.id,
+        userId: a.userId,
+        userName: a.userName,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        userAvatar: a.userAvatar,
+        hasName: !!(a.firstName || a.lastName || a.userName)
+      })));
       setActivities(socialActivities);
       setHasMore(allActivities.length >= limit);
     } catch (error) {

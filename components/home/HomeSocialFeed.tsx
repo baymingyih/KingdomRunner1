@@ -52,7 +52,12 @@ export function HomeSocialFeed({ activities, limit = 3 }: HomeSocialFeedProps) {
                   </Avatar>
                   
                   <div>
-                    <h3 className="font-semibold">{activity.userName}</h3>
+                    <h3 className="font-semibold">
+                      {/* Prioritize firstName and lastName if available */}
+                      {(activity.firstName || activity.lastName) 
+                        ? `${activity.firstName || ''} ${activity.lastName || ''}`.trim()
+                        : activity.userName || 'Anonymous'}
+                    </h3>
                     <p className="text-xs text-muted-foreground">
                       {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
                     </p>
@@ -67,7 +72,10 @@ export function HomeSocialFeed({ activities, limit = 3 }: HomeSocialFeedProps) {
                 <div className="flex-grow">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                     <Timer className="h-4 w-4" />
-                    <span>{Math.floor(activity.duration / 60)} minutes</span>
+                    <span>
+                      {activity.hours > 0 ? `${activity.hours}h ` : ''}
+                      {activity.minutes > 0 ? `${activity.minutes}m` : activity.hours > 0 ? '0m' : '0 minutes'}
+                    </span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
