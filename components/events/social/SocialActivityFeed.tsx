@@ -130,11 +130,11 @@ export function SocialActivityFeed({
                       )}
                       
                       {activity.imageUrl && (
-                        <div className="mt-3 relative aspect-video w-full overflow-hidden rounded-lg border">
+                        <div className="mt-3 relative aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
                           <img
                             src={activity.imageUrl}
                             alt="Activity"
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                           />
                         </div>
                       )}
@@ -142,11 +142,11 @@ export function SocialActivityFeed({
                       {activity.imageUrls && activity.imageUrls.length > 0 && (
                         <div className="mt-3 grid grid-cols-2 gap-2">
                           {activity.imageUrls.map((url, index) => (
-                            <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                            <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
                               <img
                                 src={url}
                                 alt={`Activity ${index + 1}`}
-                                className="h-full w-full object-cover"
+                                className="h-full w-full object-contain"
                               />
                             </div>
                           ))}
