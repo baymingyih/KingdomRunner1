@@ -64,7 +64,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
                   </TabsContent>
 
                   <TabsContent value="leaderboard">
-                    <EventLeaderboard leaderboard={event.leaderboard} />
+                    <EventLeaderboard eventId={event.id} />
                   </TabsContent>
 
                   <TabsContent value="social-wall">

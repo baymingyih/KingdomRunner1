@@ -96,7 +96,7 @@ export default function EventDetail({ event }: { event: Event }) {
             </TabsContent>
 
             <TabsContent value="leaderboard" className="mt-6">
-              <EventLeaderboard leaderboard={event.leaderboard} />
+              <EventLeaderboard eventId={event.id} />
             </TabsContent>
 
             <TabsContent value="prayers" className="mt-6">
