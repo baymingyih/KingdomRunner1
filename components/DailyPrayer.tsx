@@ -6,9 +6,13 @@ import Link from 'next/link';
 import { Heart } from 'lucide-react';
 
 const verseOfTheWeek = {
-  title: "God's Glory Revealed: The Power of His Presence",
-  prayer: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand. (Isaiah 41:10)",
-  focus: "Meditate on God's promise to be with you and strengthen you in all circumstances."
+  title: "God's Glory Revealed: Running on Tired Legs",
+  prayer: `"But those who hope in the Lord will renew their strength.
+They will soar on wings like eagles;
+they will run and not grow weary,
+they will walk and not be faint."`,
+  verseRef: "Isaiah 40:31",
+  focus: "Trust in God's promise to renew your strength when you feel weary."
 };
 
 export default function DailyPrayer() {
@@ -24,11 +28,14 @@ export default function DailyPrayer() {
         <div className="px-4">
           <div className="text-center">
             <h3 className="text-xl font-semibold mb-4">{verseOfTheWeek.title}</h3>
-            <p className="italic mb-4">{verseOfTheWeek.prayer}</p>
+            <blockquote className="italic mb-4 text-lg">
+              {verseOfTheWeek.prayer}
+              <footer className="text-base mt-2">{verseOfTheWeek.verseRef}</footer>
+            </blockquote>
             <div className="bg-muted p-4 rounded-lg mb-4">
               <p className="text-sm text-muted-foreground">{verseOfTheWeek.focus}</p>
             </div>
-            <Link href="/verse-of-the-week" className="inline-block">
+            <Link href="/verse-of-the-week/running-on-tired-legs" className="inline-block">
               <Button className={buttonVariants({ variant: 'outline' }) + " w-full"}>
                 Read Full Article
               </Button>
