@@ -91,7 +91,7 @@ export function RecentRuns({ activities, onDelete }: RecentRunsProps) {
                     <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-2">
                       <div className="flex items-center gap-2">
                         <Timer className="h-4 w-4" />
-                        <span>{Math.floor(activity.duration / 60)} minutes</span>
+                        <span>{Math.floor(activity.duration / 60)}h {activity.duration % 60}m</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
