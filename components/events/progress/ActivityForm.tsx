@@ -229,10 +229,10 @@ export function ActivityForm({ onSubmit, submitting }: ActivityFormProps) {
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging Activity...
+                  Sharing...
                 </>
               ) : (
-                'Log Activity'
+                'Share Your Run'
               )}
             </Button>
           </div>
