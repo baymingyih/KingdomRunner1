@@ -160,7 +160,7 @@ export function SocialActivityFeed({
                         className={`border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs ${currentUser && activity.likes?.includes(currentUser.uid) ? "bg-primary/10" : ""}`}
                       >
                         <Heart className="h-4 w-4 mr-2" />
-                        {activity.likeCount || 0} {activity.likeCount === 1 ? 'Like' : 'Likes'}
+                        Praise God
                       </Button>
                       <Button 
                         onClick={() => toggleComments(activity.id!)}

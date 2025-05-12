@@ -4,15 +4,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button, buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
+import { verses } from '@/app/verse-of-the-week/page';
+
+// Function to parse date strings into Date objects
+const parseVerseDate = (dateStr: string) => {
+  const [month, day, year] = dateStr.split(/[\s,]+/);
+  const months = ["January", "February", "March", "April", "May", "June", 
+                 "July", "August", "September", "October", "November", "December"];
+  return new Date(parseInt(year), months.indexOf(month), parseInt(day));
+};
+
+// Get current verse (most recent by date)
+const currentVerse = [...verses].sort((a, b) => 
+  parseVerseDate(b.date).getTime() - parseVerseDate(a.date).getTime()
+)[0];
 
 const verseOfTheWeek = {
-  title: "God's Glory Revealed: Running on Tired Legs",
-  prayer: `"But those who hope in the Lord will renew their strength.
-They will soar on wings like eagles;
-they will run and not grow weary,
-they will walk and not be faint."`,
-  verseRef: "Isaiah 40:31",
-  focus: "Trust in God's promise to renew your strength when you feel weary."
+  title: currentVerse.title,
+  prayer: `"${currentVerse.verse}"`,
+  verseRef: currentVerse.reference,
+  focus: `Meditate on ${currentVerse.reference.split(' ')[0]}'s message for this week`
 };
 
 export default function DailyPrayer() {
@@ -35,7 +46,7 @@ export default function DailyPrayer() {
             <div className="bg-muted p-4 rounded-lg mb-4">
               <p className="text-sm text-muted-foreground">{verseOfTheWeek.focus}</p>
             </div>
-            <Link href="/verse-of-the-week/running-on-tired-legs" className="inline-block">
+            <Link href={`/verse-of-the-week/${currentVerse.id}`} className="inline-block">
               <Button className={buttonVariants({ variant: 'outline' }) + " w-full"}>
                 Read Full Article
               </Button>

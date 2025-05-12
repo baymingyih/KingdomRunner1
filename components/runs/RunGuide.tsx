@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 export function RunGuide() {
   return (
     <div>
-      <h3 className="text-2xl font-semibold mb-4">Run Guide</h3>
+      <h3 className="text-2xl font-semibold mb-4">R.U.N Guide</h3>
       <ScrollArea className="h-[400px] pr-4">
         <div className="grid gap-4">
           <Card className="hover:shadow-md transition-shadow">
