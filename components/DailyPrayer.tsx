@@ -4,15 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button, buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
-import { verses } from '@/app/verse-of-the-week/page';
-
-// Function to parse date strings into Date objects
-const parseVerseDate = (dateStr: string) => {
-  const [month, day, year] = dateStr.split(/[\s,]+/);
-  const months = ["January", "February", "March", "April", "May", "June", 
-                 "July", "August", "September", "October", "November", "December"];
-  return new Date(parseInt(year), months.indexOf(month), parseInt(day));
-};
+import { verses, parseVerseDate } from '@/app/verse-of-the-week/verses';
 
 // Get current verse (most recent by date)
 const currentVerse = [...verses].sort((a, b) => 
