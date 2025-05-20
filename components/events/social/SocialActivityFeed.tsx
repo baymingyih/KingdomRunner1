@@ -15,7 +15,7 @@ import { User } from 'firebase/auth';
 
 interface SocialActivityFeedProps {
   activities: SocialActivity[];
-  onLike: (activityId: string) => Promise<void>;
+  praiseActivity: (activityId: string) => Promise<void>;
   onComment: (activityId: string, comment: string) => Promise<void>;
   onShare: (activityId: string) => Promise<void>;
   currentUser: User | null;
@@ -23,7 +23,7 @@ interface SocialActivityFeedProps {
 
 export function SocialActivityFeed({ 
   activities, 
-  onLike, 
+  praiseActivity, 
   onComment, 
   onShare,
   currentUser
@@ -156,11 +156,10 @@ export function SocialActivityFeed({
                     
                     <div className="flex gap-2 mt-4">
                       <Button 
-                        onClick={() => onLike(activity.id!)}
-                        className={`border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs ${currentUser && activity.likes?.includes(currentUser.uid) ? "bg-primary/10" : ""}`}
+                        onClick={() => praiseActivity(activity.id!)}
+                        className={`border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs ${currentUser && activity.praises?.includes(currentUser.uid) ? "bg-primary/10" : ""}`}
                       >
-                        <Heart className="h-4 w-4 mr-2" />
-                        Praise God
+                        🙌 Praise God ({activity.praiseCount || 0})
                       </Button>
                       <Button 
                         onClick={() => toggleComments(activity.id!)}

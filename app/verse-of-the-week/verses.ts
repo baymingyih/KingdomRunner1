@@ -8,6 +8,13 @@ export const verses = [
     date: "April 22, 2025"
   },
   {
+    id: "running-with-fresh-power",
+    title: "God's Glory Received: Running with Fresh Power",
+    verse: "Seek the LORD and His strength; seek His presence continually!",
+    reference: "1 Chronicles 16:11 (ESV)",
+    date: "April 29, 2025"
+  },
+  {
     id: "providence",
     title: "God's Glory Revealed: Providence",
     verse: "And my God will meet all your needs according to the riches of His glory in Christ Jesus.",

@@ -21,7 +21,7 @@ export function EventSocialWall({ eventId }: EventSocialWallProps) {
     activities, 
     loading, 
     error, 
-    likeActivity, 
+    praiseActivity, 
     commentOnActivity, 
     shareActivity,
     submitActivity,
@@ -87,7 +87,7 @@ export function EventSocialWall({ eventId }: EventSocialWallProps) {
       
       <SocialActivityFeed 
         activities={sortedActivities}
-        onLike={likeActivity}
+        praiseActivity={praiseActivity}
         onComment={commentOnActivity}
         onShare={shareActivity}
         currentUser={user}

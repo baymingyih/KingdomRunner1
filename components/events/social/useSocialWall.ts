@@ -9,10 +9,21 @@ import {
   Activity, 
   ActivityInput 
 } from '@/lib/db/activities';
-import { doc, updateDoc, arrayUnion, getDoc, setDoc, Timestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, getDoc, setDoc, Timestamp, collection, addDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase/init';
 
 export interface SocialActivity extends Activity {
+  likes?: string[];
+  likeCount?: number;
+  praises?: string[];
+  praiseCount?: number;
+  comments?: Comment[];
+  commentCount?: number;
+}
+
+interface ActivitySocialDoc {
+  praises: string[];
+  praiseCount: number;
   likes?: string[];
   likeCount?: number;
   comments?: Comment[];
@@ -88,14 +99,77 @@ export function useSocialWall(eventId: string) {
     });
   }, [toast]);
 
-  // Like an activity
-  const likeActivity = useCallback(async (activityId: string) => {
-    // Simplified: just show a toast for now
-    toast({
-      title: "Like feature",
-      description: "This feature is coming soon",
-    });
-  }, [toast]);
+  // Praise an activity
+  const praiseActivity = useCallback(async (activityId: string) => {
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to praise",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Optimistic UI update
+      setActivities(prev => prev.map(activity => {
+        if (activity.id === activityId) {
+          const alreadyPraised = activity.praises?.includes(user.uid);
+          return {
+            ...activity,
+            praises: alreadyPraised 
+              ? activity.praises?.filter(id => id !== user.uid)
+              : [...(activity.praises || []), user.uid],
+            praiseCount: alreadyPraised
+              ? (activity.praiseCount || 1) - 1
+              : (activity.praiseCount || 0) + 1
+          };
+        }
+        return activity;
+      }));
+
+      // Update in Firestore - use activitySocial collection
+      const socialRef = doc(db, 'activitySocial', activityId);
+      const socialDoc = await getDoc(socialRef);
+      
+      if (!socialDoc.exists()) {
+        // Create document if it doesn't exist
+        await setDoc(socialRef, {
+          praises: [user.uid],
+          praiseCount: 1,
+          likes: [],
+          likeCount: 0,
+          comments: [],
+          commentCount: 0
+        });
+      } else {
+        // Update existing document
+        await updateDoc(socialRef, {
+          'praises': arrayUnion(user.uid),
+          'praiseCount': increment(1)
+        });
+      }
+
+    } catch (error) {
+      console.error('Error praising activity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to praise activity",
+        variant: "destructive",
+      });
+      // Revert optimistic update
+      setActivities(prev => prev.map(activity => {
+        if (activity.id === activityId) {
+          return {
+            ...activity,
+            praises: activity.praises?.filter(id => id !== user?.uid),
+            praiseCount: Math.max(0, (activity.praiseCount || 1) - 1)
+          };
+        }
+        return activity;
+      }));
+    }
+  }, [toast, user]);
 
   // Comment on an activity
   const commentOnActivity = useCallback(async (activityId: string, content: string) => {
@@ -156,7 +230,7 @@ export function useSocialWall(eventId: string) {
     loading,
     error,
     hasMore,
-    likeActivity,
+    praiseActivity,
     commentOnActivity,
     shareActivity,
     submitActivity,

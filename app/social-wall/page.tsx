@@ -60,7 +60,7 @@ export default function SocialWallPage() {
         
         <SocialActivityFeed 
           activities={sortedActivities}
-          onLike={async () => {}}
+          praiseActivity={async () => {}}
           onComment={async () => {}}
           onShare={async () => {}}
           currentUser={user}
