@@ -7,11 +7,15 @@ import {
   Activity
 } from '@/lib/db/activities';
 import { getEventById } from '@/lib/data/events';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/init';
 
 export interface GlobalSocialActivity extends Activity {
   eventName?: string;
   likes?: string[];
   likeCount?: number;
+  praises?: string[];
+  praiseCount?: number;
   comments?: any[];
   commentCount?: number;
   firstName?: string;
@@ -23,7 +27,32 @@ export function useGlobalSocialWall(limit: number = 10) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number>(Date.now());
   const { user } = useAuthContext();
+
+  // Fetch social data for activities
+  const fetchSocialData = useCallback(async (activityIds: string[]) => {
+    if (!activityIds.length) return {};
+    
+    try {
+      const socialData: Record<string, any> = {};
+      
+      // Batch fetch social data for all activities
+      const socialRefs = activityIds.map(id => doc(db, 'activitySocial', id));
+      const socialDocs = await Promise.all(socialRefs.map(ref => getDoc(ref)));
+      
+      socialDocs.forEach((doc, index) => {
+        if (doc.exists()) {
+          socialData[activityIds[index]] = doc.data();
+        }
+      });
+      
+      return socialData;
+    } catch (error) {
+      console.error('Error fetching social data:', error);
+      return {};
+    }
+  }, []);
 
   // Fetch activities from all events
   const fetchActivities = useCallback(async () => {
@@ -31,8 +60,20 @@ export function useGlobalSocialWall(limit: number = 10) {
       setLoading(true);
       const allActivities = await getAllActivities(limit);
       
-      // Transform activities to include basic info
+      // Get social data for all activities
+      const activityIds = allActivities.map(activity => activity.id!);
+      
+      // Only try to fetch social data if we have activities and a user (authenticated)
+      let socialData = {};
+      if (activityIds.length > 0 && user) {
+        socialData = await fetchSocialData(activityIds);
+      }
+      
+      // Transform activities to include social features
       const socialActivities: GlobalSocialActivity[] = allActivities.map((activity) => {
+        const activityId = activity.id!;
+        const social = socialData[activityId];
+        
         // Log each activity's user data for debugging
         console.log('Raw activity user data:', {
           id: activity.id,
@@ -44,10 +85,12 @@ export function useGlobalSocialWall(limit: number = 10) {
         
         return {
           ...activity,
-          likes: [],
-          likeCount: 0,
-          comments: [],
-          commentCount: 0
+          likes: social?.likes || [],
+          likeCount: social?.likeCount || 0,
+          praises: social?.praises || [],
+          praiseCount: social?.praiseCount || 0,
+          comments: social?.comments || [],
+          commentCount: social?.commentCount || 0
         };
       });
       
@@ -78,6 +121,8 @@ export function useGlobalSocialWall(limit: number = 10) {
       })));
       setActivities(socialActivities);
       setHasMore(allActivities.length >= limit);
+      // Update the last refresh time
+      setLastRefreshTime(Date.now());
     } catch (error) {
       console.error('Error loading activities:', error);
       setError(error instanceof Error ? error : new Error('Failed to load activities'));
@@ -85,17 +130,25 @@ export function useGlobalSocialWall(limit: number = 10) {
     } finally {
       setLoading(false);
     }
-  }, [limit]);
+  }, [limit, fetchSocialData, user]);
 
-  // Initial load
+  // Initial load and refresh when lastRefreshTime changes
   useEffect(() => {
     fetchActivities();
-  }, [fetchActivities]);
+  }, [fetchActivities, lastRefreshTime]);
+
+  // Function to manually trigger a refresh
+  const refreshActivities = useCallback(() => {
+    // Update lastRefreshTime to trigger the useEffect
+    setLastRefreshTime(Date.now());
+  }, []);
 
   return {
     activities,
     loading,
     error,
-    hasMore
+    hasMore,
+    refreshActivities,
+    fetchActivities // Expose the original fetch function as well
   };
 }

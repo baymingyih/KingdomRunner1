@@ -50,11 +50,21 @@ export function SocialActivityFeed({
     const comment = commentInputs[activityId];
     if (!comment?.trim()) return;
     
-    await onComment(activityId, comment);
-    setCommentInputs(prev => ({
-      ...prev,
-      [activityId]: ''
-    }));
+    try {
+      await onComment(activityId, comment);
+      // Clear the input field after successful submission
+      setCommentInputs(prev => ({
+        ...prev,
+        [activityId]: ''
+      }));
+      
+      // Ensure comments are expanded after posting
+      if (!expandedComments.includes(activityId)) {
+        setExpandedComments(prev => [...prev, activityId]);
+      }
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
   };
 
   if (activities.length === 0) {
