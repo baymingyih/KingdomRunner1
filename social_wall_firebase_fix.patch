@@ -1,0 +1,26 @@
+From 9794fae7270538c135ce0116209bbc48ecab2187 Mon Sep 17 00:00:00 2001
+From: Developer <developer@kingdomrunner.com>
+Date: Tue, 20 May 2025 15:39:17 +0000
+Subject: [PATCH] fix: prevent undefined fields when adding/updating comments
+ in social wall
+
+---
+ app/social-wall/page.tsx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/app/social-wall/page.tsx b/app/social-wall/page.tsx
+index 0128042..fcd9477 100644
+--- a/app/social-wall/page.tsx
++++ b/app/social-wall/page.tsx
+@@ -150,7 +150,7 @@ export default function SocialWallPage() {
+         userName: userData?.firstName && userData?.lastName 
+           ? `${userData.firstName} ${userData.lastName}`.trim()
+           : user.displayName || 'Anonymous',
+-        userAvatar: userData?.avatar || user.photoURL || undefined,
++        userAvatar: userData?.avatar || user.photoURL || null,
+         content: content.trim(),
+         timestamp: new Date()
+       };
+-- 
+2.34.1
+

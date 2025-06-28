@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { 
   getEventActivities, 
   logActivity, 
@@ -60,7 +60,7 @@ export function useSocialWall(eventId: string) {
   const [hasMore, setHasMore] = useState(false);
   const [lastVisible, setLastVisible] = useState<any>(null);
   const { toast } = useToast();
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   // Fetch social data for activities
   const fetchSocialData = useCallback(async (activityIds: string[]) => {
@@ -299,11 +299,19 @@ export function useSocialWall(eventId: string) {
         const existingComments = existingData?.comments || [];
         const updatedComments = [...existingComments, firestoreComment];
         
-        // Update document with new comments array
-        await updateDoc(socialRef, {
-          comments: updatedComments,
+        // Prepare update data
+        const updateData: Record<string, any> = {
           commentCount: increment(1)
-        });
+        };
+        
+        // Only include comments if they exist and are valid
+        if (Array.isArray(updatedComments) && 
+            updatedComments.every(c => c && c.id && c.content)) {
+          updateData.comments = updatedComments;
+        }
+        
+        // Update document with validated data
+        await updateDoc(socialRef, updateData);
       }
 
       // Update local state after successful Firestore update

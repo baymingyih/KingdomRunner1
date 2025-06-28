@@ -14,7 +14,7 @@ import { Input } from 'components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from 'components/ui/card';
 import { Alert, AlertDescription } from 'components/ui/alert';
 import { useToast } from 'components/ui/use-toast';
-import { loginUser } from 'lib/auth';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
@@ -27,7 +27,7 @@ const loginSchema = z.object({
 type LoginData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, error: authError, loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -41,26 +41,28 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (values: LoginData) => {
-    setIsLoading(true);
     setError(null);
     
     try {
-      await loginUser(values.email, values.password);
+      const user = await login(values.email, values.password);
+      
+      // Wait for auth state to settle and cookies to be set
+      console.log('Waiting for auth state to settle...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Checking cookies after delay:', document.cookie);
+      
       toast({
         title: "Login Successful",
-        description: "Welcome back to Kingdom Runners!",
+        description: "You are now signed in",
       });
-      router.push('/events/1');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Invalid credentials";
-      setError(errorMessage);
+      setError('Login failed: ' + errorMessage);
       toast({
         title: "Login Failed",
         description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -74,9 +76,9 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
+          {(error || authError) && (
             <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{error || authError}</AlertDescription>
             </Alert>
           )}
           
@@ -90,7 +92,7 @@ export default function LoginPage() {
                     {...field}
                     type="email"
                     placeholder="your@email.com"
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                 )}
               />
@@ -102,12 +104,12 @@ export default function LoginPage() {
                     {...field}
                     type="password"
                     placeholder="••••••••"
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                 )}
               />
-              <Button type="submit" className="w-full py-2" disabled={isLoading}>
-                {isLoading ? (
+              <Button type="submit" className="w-full py-2" disabled={loading}>
+                {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Signing in...

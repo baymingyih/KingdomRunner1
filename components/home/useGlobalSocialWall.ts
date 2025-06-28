@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { 
   getAllActivities, 
   Activity
@@ -28,7 +28,7 @@ export function useGlobalSocialWall(limit: number = 10) {
   const [error, setError] = useState<Error | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(Date.now());
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   // Fetch social data for activities
   const fetchSocialData = useCallback(async (activityIds: string[]) => {
@@ -64,7 +64,14 @@ export function useGlobalSocialWall(limit: number = 10) {
       const activityIds = allActivities.map(activity => activity.id!);
       
       // Only try to fetch social data if we have activities and a user (authenticated)
-      let socialData = {};
+      let socialData: Record<string, {
+        likes?: string[];
+        likeCount?: number;
+        praises?: string[];
+        praiseCount?: number;
+        comments?: any[];
+        commentCount?: number;
+      }> = {};
       if (activityIds.length > 0 && user) {
         socialData = await fetchSocialData(activityIds);
       }

@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase/init';
-import { setAuthCookie, removeAuthCookie } from '@/lib/auth/utils';
+import { auth } from '../firebase/init';
+import { setAuthCookie, removeAuthCookie } from './utils';
 
 interface AuthContextType {
   user: User | null;
@@ -23,10 +23,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       console.log('🔐 Auth state changed:', user?.email);
+      setUser(user);
+      setLoading(false);
       
       if (user) {
-        setUser(user);
-        setLoading(false);
         try {
           const token = await user.getIdToken();
           const userId = user.uid;
@@ -38,13 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setError('Failed to set authentication cookies');
         }
       } else {
-        // Only remove cookies if we previously had a user
-        if (user !== null) {
-          removeAuthCookie();
-          console.log('🗑️ Auth cookies removed');
-        }
-        setUser(null);
-        setLoading(false);
+        removeAuthCookie();
+        console.log('🗑️ Auth cookies removed');
       }
     });
 

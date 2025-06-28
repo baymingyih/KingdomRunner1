@@ -35,5 +35,14 @@ export const activitySchema = z.object({
     )
     .max(MAX_IMAGES, `Maximum ${MAX_IMAGES} images allowed`)
     .optional()
-    .default([])
+    .default([]),
+
+  // Strava-specific fields
+  stravaActivityId: z.string().optional(),
+  activityType: z.string().optional(),
+  elevationGain: z.number().optional(),
+  averageHeartRate: z.number().optional(),
+  maxHeartRate: z.number().optional()
 });
+
+export type ActivityInput = z.infer<typeof activitySchema>;

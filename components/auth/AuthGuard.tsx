@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthContext } from './AuthProvider';
+import { useAuth } from './AuthProvider';
 import LoadingScreen from './LoadingScreen';
 
 interface AuthGuardProps {
@@ -16,7 +16,7 @@ export function AuthGuard({
   redirectTo = '/register',
   message = 'Please sign in to access this page'
 }: AuthGuardProps) {
-  const { user, loading } = useAuthContext();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

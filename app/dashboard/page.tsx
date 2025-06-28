@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from 'components/ui/card';
-import { useAuthContext } from 'components/auth/AuthProvider';
+import { useAuth } from 'components/auth/AuthProvider';
 import { getUser, type UserProfile } from 'lib/db/users';
 import { Loader2 } from 'lucide-react';
 import { useToast } from 'components/ui/use-toast.ts';
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuthContext();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();

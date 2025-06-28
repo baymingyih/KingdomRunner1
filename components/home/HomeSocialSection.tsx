@@ -5,10 +5,10 @@ import { HomeSocialFeed } from './HomeSocialFeed';
 import { useGlobalSocialWall } from './useGlobalSocialWall';
 import { LoadingSpinner } from '@/components/events/progress/LoadingSpinner';
 import Link from 'next/link';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function HomeSocialSection() {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const { activities, loading } = useGlobalSocialWall(3);
 
   // Don't render anything if user is not logged in

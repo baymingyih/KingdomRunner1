@@ -10,10 +10,10 @@ export default function NotFound() {
         Sorry, we couldn't find the page you're looking for.
       </p>
       <div className="flex flex-col sm:flex-row gap-4">
-        <Link href="/" className={cn(buttonVariants({ variant: 'default' }))}>
+        <Link href="/" className={cn(buttonVariants.default)}>
           Return Home
         </Link>
-        <Link href="/events" className={cn(buttonVariants({ variant: 'outline' }))}>
+        <Link href="/events" className={cn(buttonVariants.outline)}>
           Browse Events
         </Link>
       </div>

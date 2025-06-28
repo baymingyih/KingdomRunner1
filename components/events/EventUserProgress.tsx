@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { logActivity } from '@/lib/db/activities';
@@ -19,7 +19,7 @@ interface EventUserProgressProps {
 
 export function EventUserProgress({ eventId }: EventUserProgressProps) {
   const [submitting, setSubmitting] = useState(false);
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { loading, error, activities, stats, updateActivities, deleteActivity } = useProgress(user?.uid);
 

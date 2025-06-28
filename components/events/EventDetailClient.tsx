@@ -15,7 +15,7 @@ import { EventUserProgress } from './EventUserProgress';
 import { EventHero } from './EventHero';
 import { EventOverview } from './EventOverview';
 import { type Event } from '@/lib/data/events';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -27,7 +27,7 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export default function EventDetailClient({ event }: { event: Event }) {
   const [selectedTab, setSelectedTab] = useState("social-wall");
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   return (
     <AuthGuard>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ interface ActivitySubmissionFormProps {
 }
 
 export function ActivitySubmissionForm({ eventId, onSubmit }: ActivitySubmissionFormProps) {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [distance, setDistance] = useState('');

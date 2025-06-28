@@ -12,12 +12,12 @@ import { EventPrayers } from '@/components/events/EventPrayers';
 import { RecentRuns as EventRecentRuns } from '@/components/events/progress/RecentRuns';
 import { EventUserProgress } from '@/components/events/EventUserProgress';
 import { type Event } from '@/lib/data/events';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { getEventActivities } from '@/lib/db/activities';
 
 export default function EventDetail({ event }: { event: Event }) {
   const [selectedTab, setSelectedTab] = useState("overview");
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const [activities, setActivities] = useState<React.ComponentProps<typeof EventRecentRuns>['activities']>([]);
 
   useEffect(() => {

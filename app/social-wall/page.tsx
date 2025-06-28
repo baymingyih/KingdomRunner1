@@ -8,12 +8,12 @@ import { useGlobalSocialWall } from '@/components/home/useGlobalSocialWall';
 import { SocialActivityFeed } from '@/components/events/social/SocialActivityFeed';
 import { LoadingSpinner } from '@/components/events/progress/LoadingSpinner';
 import { ErrorDisplay } from '@/components/events/progress/ErrorDisplay';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function SocialWallPage() {
   const [activeTab, setActiveTab] = useState<'latest' | 'popular'>('latest');
   const { activities, loading, error, hasMore } = useGlobalSocialWall(20);
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   if (loading) {
     return (

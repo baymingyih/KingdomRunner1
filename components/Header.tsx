@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuthContext } from './auth/AuthProvider';
+import { useAuth } from './auth/AuthProvider';
 import { signOut } from '@/lib/auth';
 import { useToast } from './ui/use-toast';
 import { Avatar, AvatarFallback } from './ui/avatar';
@@ -34,7 +34,7 @@ interface NavLinkProps {
 const Header = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
-  const { user, loading } = useAuthContext();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 

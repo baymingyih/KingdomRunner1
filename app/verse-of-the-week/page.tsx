@@ -30,7 +30,7 @@ export default function VerseOfTheWeek() {
             </blockquote>
             <div className="mt-4">
               <Link href={`/verse-of-the-week/${currentVerse.id}`}>
-                <Button className="w-full flex items-center justify-center gap-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground">
+                <Button variant="outline" className="w-full flex items-center justify-center gap-2">
                   Read Full Article <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -55,7 +55,7 @@ export default function VerseOfTheWeek() {
               </blockquote>
               <div className="mt-4">
                 <Link href={`/verse-of-the-week/${verse.id}`}>
-                  <Button className="w-full flex items-center justify-center gap-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground">
+                  <Button variant="outline" className="w-full flex items-center justify-center gap-2">
                     Read Full Article <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

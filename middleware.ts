@@ -16,9 +16,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (isAuthRoute && token) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+    // Removed automatic redirect from auth routes to dashboard
+    // Users can now stay on login page after signing in
 
     return NextResponse.next();
   } catch (error) {

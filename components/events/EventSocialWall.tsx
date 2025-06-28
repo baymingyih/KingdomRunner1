@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialActivityFeed } from './social/SocialActivityFeed';
@@ -16,7 +16,7 @@ interface EventSocialWallProps {
 
 export function EventSocialWall({ eventId }: EventSocialWallProps) {
   const [activeTab, setActiveTab] = useState<'latest' | 'popular'>('latest');
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const { 
     activities, 
     loading, 

@@ -3,11 +3,11 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthContext } from '../../components/auth/AuthProvider';
+import { useAuth } from '../../components/auth/AuthProvider';
 
 export function withAuth(WrappedComponent: React.ComponentType<any>) {
   return function AuthenticatedComponent(props: any) {
-    const { user, loading } = useAuthContext();
+    const { user, loading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
@@ -32,21 +32,14 @@ export function withGuest<P extends { children?: React.ReactNode }>(
   WrappedComponent: React.ComponentType<P>
 ) {
   return function GuestComponent(props: P) {
-    const { user, loading } = useAuthContext();
+    const { user, loading } = useAuth();
     const router = useRouter();
 
-    useEffect(() => {
-      if (!loading && user) {
-        router.push('/dashboard');
-      }
-    }, [user, loading, router]);
+    // Removed automatic redirect to dashboard
+    // User will stay on current page after login
 
     if (loading) {
       return <div>Loading...</div>;
-    }
-
-    if (user) {
-      return null;
     }
 
     return <WrappedComponent {...props} />;

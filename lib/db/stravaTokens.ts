@@ -1,50 +1,30 @@
-import { db } from '../firebase';
-import { collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { adminFirestore } from '../firebase/admin';
 
-interface StravaTokens {
+export interface StravaTokens {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
-}
-
-export async function saveStravaTokens(userId: string, tokens: StravaTokens) {
-  try {
-    const userTokenRef = doc(db, 'stravaTokens', userId);
-    await setDoc(userTokenRef, {
-      ...tokens,
-      updatedAt: new Date(),
-    });
-  } catch (error) {
-    console.error('Error saving Strava tokens:', error);
-    throw new Error('Failed to save Strava tokens');
-  }
+  athleteId?: number;
+  athleteName?: string;
+  athleteProfile?: string;
+  athleteCity?: string;
+  athleteCountry?: string;
 }
 
 export async function getStravaTokens(userId: string): Promise<StravaTokens | null> {
-  try {
-    const userTokenRef = doc(db, 'stravaTokens', userId);
-    const tokenDoc = await getDoc(userTokenRef);
-    
-    if (!tokenDoc.exists()) {
-      return null;
-    }
-
-    return tokenDoc.data() as StravaTokens;
-  } catch (error) {
-    console.error('Error getting Strava tokens:', error);
-    throw new Error('Failed to get Strava tokens');
+  const docRef = adminFirestore.doc(`stravaTokens/${userId}`);
+  const docSnap = await docRef.get();
+  
+  if (docSnap.exists) {
+    return docSnap.data() as StravaTokens;
   }
+  return null;
 }
 
-export async function updateStravaTokens(userId: string, tokens: Partial<StravaTokens>) {
-  try {
-    const userTokenRef = doc(db, 'stravaTokens', userId);
-    await updateDoc(userTokenRef, {
-      ...tokens,
-      updatedAt: new Date(),
-    });
-  } catch (error) {
-    console.error('Error updating Strava tokens:', error);
-    throw new Error('Failed to update Strava tokens');
-  }
+export async function saveStravaTokens(userId: string, tokens: StravaTokens): Promise<void> {
+  const docRef = adminFirestore.doc(`stravaTokens/${userId}`);
+  await docRef.set(tokens);
 }
+
+// Alias for backward compatibility
+export const storeStravaTokens = saveStravaTokens;

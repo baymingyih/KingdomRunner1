@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { verses, parseVerseDate } from '@/app/verse-of-the-week/verses';
@@ -39,7 +39,7 @@ export default function DailyPrayer() {
               <p className="text-sm text-muted-foreground">{verseOfTheWeek.focus}</p>
             </div>
             <Link href={`/verse-of-the-week/${currentVerse.id}`} className="inline-block">
-              <Button className={buttonVariants({ variant: 'outline' }) + " w-full"}>
+              <Button variant="outline" className="w-full">
                 Read Full Article
               </Button>
             </Link>
