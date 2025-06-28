@@ -13,9 +13,11 @@ export default function TestStravaPage() {
   const [status, setStatus] = useState<StravaStatus | null>(null);
   const [showActivities, setShowActivities] = useState(false);
   const { user } = useAuth();
-  const searchParams = useSearchParams();
-  const success = searchParams.get('success');
-  const error = searchParams.get('error');
+  
+  // Only access searchParams after ensuring we're on client side
+  const searchParams = typeof window !== 'undefined' ? useSearchParams() : null;
+  const success = searchParams?.get('success');
+  const error = searchParams?.get('error');
 
   if (!user) {
     return (

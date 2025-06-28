@@ -8,7 +8,7 @@ interface StatsCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: LucideIcon;
+  icon: typeof LucideIcon;
   gradient: string;
   delay?: number;
 }
