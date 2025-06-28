@@ -22,18 +22,7 @@ interface StravaConnectProps {
   onStatusChange?: (status: StravaStatus) => void;
 }
 
-interface StravaStatusInternal {
-  connected: boolean;
-  athlete?: {
-    id: number;
-    name: string;
-    profile?: string;
-    city?: string;
-    country?: string;
-  };
-}
-
-export default function StravaConnect({ onConnected, onStatusChange }: StravaConnectProps) {
+export function StravaConnect({ onConnected, onStatusChange }: StravaConnectProps) {
   const [status, setStatus] = useState<StravaStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -163,3 +152,5 @@ export default function StravaConnect({ onConnected, onStatusChange }: StravaCon
     </Button>
   );
 }
+
+export default StravaConnect;
