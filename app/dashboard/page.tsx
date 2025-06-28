@@ -2,30 +2,92 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import type { StravaActivity } from '@/lib/strava';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { getUser, type UserProfile } from '@/lib/db/users';
+import { getUser, createUser, type UserProfile } from '@/lib/db/users';
 import { Loader2, Activity, Calendar, Trophy, Heart, MapPin, Clock, Target, Zap } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { StravaConnect, type StravaStatus } from '@/components/strava/StravaConnect';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
+// Format pace from m/s to min/km
+const formatPace = (speed: number) => {
+  if (!speed || speed <= 0) return "0:00";
+  const pace = 1000 / speed / 60; // Convert m/s to min/km
+  const minutes = Math.floor(pace);
+  const seconds = Math.floor((pace - minutes) * 60);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
+// Format time from seconds to HH:MM:SS
+const formatTime = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours > 0 ? `${hours}:` : ''}${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
+// Calculate stats from activities
+const calculateStats = (activities: StravaActivity[]) => {
+  const now = new Date();
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  const weeklyActivities = activities.filter(activity => 
+    new Date(activity.start_date) >= oneWeekAgo
+  );
+
+  const weeklyDistance = weeklyActivities
+    .reduce((sum, activity) => sum + activity.distance, 0) / 1000; // Convert to km
+
+  const weeklyRuns = weeklyActivities.length;
+
+  const averagePace = weeklyActivities.length > 0
+    ? weeklyActivities.reduce((sum, activity) => sum + activity.average_speed, 0) / weeklyActivities.length
+    : 0;
+
+  const totalDistance = activities
+    .reduce((sum, activity) => sum + activity.distance, 0) / 1000; // Convert to km
+
+  const longestRun = activities.length > 0
+    ? Math.max(...activities.map(activity => activity.distance)) / 1000
+    : 0;
+
+  const recentRuns = activities.slice(0, 3).map(activity => ({
+    id: activity.id,
+    name: activity.name,
+    distance: (activity.distance / 1000).toFixed(1),
+    time: formatTime(activity.moving_time),
+    pace: formatPace(activity.average_speed),
+    date: new Date(activity.start_date).toISOString().split('T')[0]
+  }));
+
+  return {
+    weeklyDistance: weeklyDistance.toFixed(1),
+    weeklyRuns,
+    averagePace: formatPace(averagePace),
+    totalDistance: totalDistance.toFixed(1),
+    longestRun: longestRun.toFixed(1),
+    recentRuns
+  };
+};
+
 // Mock data for demonstration
 const mockStravaStats = {
-  weeklyDistance: 25.4,
+  weeklyDistance: "25.4",
   weeklyRuns: 4,
   averagePace: "5:30",
-  totalDistance: 156.8,
-  longestRun: 12.5,
+  totalDistance: "156.8",
+  longestRun: "12.5",
   recentRuns: [
-    { id: 1, name: "Morning Run", distance: 8.2, time: "45:20", pace: "5:31", date: "2025-01-15" },
-    { id: 2, name: "Easy Recovery", distance: 5.0, time: "28:45", pace: "5:45", date: "2025-01-14" },
-    { id: 3, name: "Tempo Run", distance: 6.5, time: "33:15", pace: "5:07", date: "2025-01-12" }
+    { id: 1, name: "Morning Run", distance: "8.2", time: "45:20", pace: "5:31", date: "2025-01-15" },
+    { id: 2, name: "Easy Recovery", distance: "5.0", time: "28:45", pace: "5:45", date: "2025-01-14" },
+    { id: 3, name: "Tempo Run", distance: "6.5", time: "33:15", pace: "5:07", date: "2025-01-12" }
   ]
 };
 
@@ -62,14 +124,20 @@ const mockPrayerStats = {
 };
 
 export default function DashboardPage() {
+  // All hooks must be called in the same order each render
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  
+  // State declarations
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [stravaStatus, setStravaStatus] = useState<StravaStatus | null>(null);
+  const [stravaStats, setStravaStats] = useState<any>(null);
+  const [loadingActivities, setLoadingActivities] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const router = useRouter();
-  const { toast } = useToast();
 
+  // Effect hooks
   useEffect(() => {
     const loadUserData = async () => {
       if (!authLoading && !user) {
@@ -79,7 +147,17 @@ export default function DashboardPage() {
 
       if (user) {
         try {
-          const userProfile = await getUser(user.uid);
+          let userProfile = await getUser(user.uid);
+          if (!userProfile) {
+            console.log('Creating new user profile for', user.email);
+            userProfile = await createUser({
+              uid: user.uid,
+              email: user.email || '',
+              firstName: user.displayName?.split(' ')[0] || 'User',
+              lastName: user.displayName?.split(' ')[1] || '',
+              country: ''
+            });
+          }
           setProfile(userProfile);
         } catch (error) {
           console.error('Error loading user profile:', error);
@@ -98,6 +176,43 @@ export default function DashboardPage() {
     loadUserData();
   }, [user, authLoading, router, toast]);
 
+  useEffect(() => {
+    const loadStravaActivities = async () => {
+      if (stravaStatus?.connected) {
+        setLoadingActivities(true);
+        try {
+          const response = await fetch(`/api/strava/activities?per_page=100`);
+          if (response.ok) {
+            const activities = await response.json();
+            const runs = activities
+              .filter((a: any) => a.type === 'Run')
+              .sort((a: any, b: any) => 
+                new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+            setStravaStats(calculateStats(runs));
+          } else {
+            console.error('Failed to fetch Strava activities:', response.status);
+            toast({
+              title: "Error",
+              description: "Failed to fetch Strava activities",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error('Error loading Strava activities:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load Strava activities",
+            variant: "destructive",
+          });
+        } finally {
+          setLoadingActivities(false);
+        }
+      }
+    };
+
+    loadStravaActivities();
+  }, [stravaStatus, toast]);
+
   if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -107,7 +222,13 @@ export default function DashboardPage() {
   }
 
   if (!profile) {
-    return null;
+    console.log('No profile found - redirecting to login', {user, authLoading, loading});
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <p>Redirecting to login...</p>
+      </div>
+    );
   }
 
   const fadeIn = {
@@ -162,8 +283,16 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium text-blue-700">Weekly Distance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-900">{mockStravaStats.weeklyDistance} km</div>
-                <p className="text-xs text-blue-600 mt-1">+12% from last week</p>
+                <div className="text-2xl font-bold text-blue-900">
+                  {loadingActivities ? (
+                    <Loader2 className="h-6 w-6 animate-spin inline" />
+                  ) : (
+                    stravaStats?.weeklyDistance || mockStravaStats.weeklyDistance
+                  )} km
+                </div>
+                <p className="text-xs text-blue-600 mt-1">
+                  {stravaStats ? "Your weekly progress" : "+12% from last week"}
+                </p>
               </CardContent>
             </Card>
 
@@ -182,8 +311,16 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium text-purple-700">Weekly Runs</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-900">{mockStravaStats.weeklyRuns}</div>
-                <p className="text-xs text-purple-600 mt-1">Target: 5 runs</p>
+                <div className="text-2xl font-bold text-purple-900">
+                  {loadingActivities ? (
+                    <Loader2 className="h-6 w-6 animate-spin inline" />
+                  ) : (
+                    stravaStats?.weeklyRuns || mockStravaStats.weeklyRuns
+                  )}
+                </div>
+                <p className="text-xs text-purple-600 mt-1">
+                  Target: {stravaStats ? "Keep it up!" : "5 runs"}
+                </p>
               </CardContent>
             </Card>
 
@@ -192,7 +329,13 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium text-orange-700">Avg Pace</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-900">{mockStravaStats.averagePace}</div>
+                <div className="text-2xl font-bold text-orange-900">
+                  {loadingActivities ? (
+                    <Loader2 className="h-6 w-6 animate-spin inline" />
+                  ) : (
+                    stravaStats?.averagePace || mockStravaStats.averagePace
+                  )}
+                </div>
                 <p className="text-xs text-orange-600 mt-1">per km</p>
               </CardContent>
             </Card>
@@ -213,7 +356,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {stravaStatus?.connected ? (
-                    mockStravaStats.recentRuns.map((run) => (
+                    (stravaStats?.recentRuns || mockStravaStats.recentRuns).map((run: any) => (
                       <div key={run.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div>
                           <h4 className="font-medium">{run.name}</h4>
