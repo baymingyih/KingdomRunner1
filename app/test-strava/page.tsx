@@ -11,7 +11,6 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function TestStravaPage() {
   const [status, setStatus] = useState<StravaStatus | null>(null);
-  const [showActivities, setShowActivities] = useState(false);
   const { user } = useAuth();
   
   // Only access searchParams after ensuring we're on client side
@@ -24,11 +23,11 @@ export default function TestStravaPage() {
       <div className="container py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Strava Integration Test</CardTitle>
+            <CardTitle>Strava Integration with Prayer Reflections</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Please log in to test the Strava integration.
+              Please log in to test the Strava integration and prayer reflection features.
             </p>
           </CardContent>
         </Card>
@@ -66,20 +65,33 @@ export default function TestStravaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Strava Integration Test</CardTitle>
+          <CardTitle>Strava Integration with Prayer Reflections</CardTitle>
+          <p className="text-muted-foreground">
+            Connect your Strava account to import activities and add prayer reflections
+          </p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Connection Status</h3>
+            <h3 className="text-lg font-semibold">Step 1: Connect to Strava</h3>
             <StravaConnect 
-              onConnected={() => setShowActivities(true)}
+              onConnected={() => {}}
               onStatusChange={setStatus}
             />
           </div>
 
           {status?.connected && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Recent Activities</h3>
+              <h3 className="text-lg font-semibold">Step 2: Import Activities & Add Prayer Reflections</h3>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-800 mb-2">New Features Available:</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• Import Strava activities with detailed metrics</li>
+                  <li>• Add prayer reflections to your imported activities</li>
+                  <li>• Expandable activity cards with social features</li>
+                  <li>• Community interaction (likes, comments, shares)</li>
+                  <li>• Link physical fitness with spiritual growth</li>
+                </ul>
+              </div>
               <StravaActivities 
                 eventId={1} 
                 onActivityLogged={() => {
