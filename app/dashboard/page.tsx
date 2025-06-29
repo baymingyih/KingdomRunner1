@@ -13,7 +13,7 @@ import { getUser, createUser, type UserProfile } from '@/lib/db/users';
 import { Loader2, Activity, Calendar, Trophy, Heart, MapPin, Clock, Target, Zap, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { StravaConnect, type StravaStatus } from '@/components/strava/StravaConnect';
-import StravaActivities from '@/components/strava/StravaActivities';
+import { StravaReflectionDashboard } from '@/components/dashboard/StravaReflectionDashboard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
@@ -441,52 +441,41 @@ export default function DashboardPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  Strava + Prayer Integration
-                </CardTitle>
-                <p className="text-muted-foreground">
-                  Connect your Strava account to import activities and add prayer reflections
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="font-medium text-blue-800 mb-2">🏃‍♂️ Faith + Fitness Integration</h3>
-                  <p className="text-sm text-blue-700">
-                    Transform your Strava activities into opportunities for spiritual growth. Import your runs, 
-                    add prayer reflections, and connect with a community that values both physical and spiritual wellness.
+            {stravaStatus?.connected ? (
+              <StravaReflectionDashboard eventId={1} />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="h-5 w-5" />
+                    Strava + Prayer Integration
+                  </CardTitle>
+                  <p className="text-muted-foreground">
+                    Connect your Strava account to import activities and add prayer reflections
                   </p>
-                  <ul className="text-sm text-blue-700 mt-3 space-y-1">
-                    <li>• Import Strava activities with detailed metrics</li>
-                    <li>• Add prayer reflections to your runs</li>
-                    <li>• Share spiritual insights with the community</li>
-                    <li>• Track both physical and spiritual progress</li>
-                  </ul>
-                </div>
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Step 1: Connect to Strava</h3>
-                  <StravaConnect onStatusChange={setStravaStatus} />
-                </div>
-
-                {stravaStatus?.connected && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Step 2: Import Activities & Add Prayer Reflections</h3>
-                    <StravaActivities 
-                      eventId={1} 
-                      onActivityLogged={() => {
-                        toast({
-                          title: "Activity imported!",
-                          description: "Your Strava activity has been imported with prayer reflection capabilities.",
-                        });
-                      }} 
-                    />
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 className="font-medium text-blue-800 mb-2">🏃‍♂️ Faith + Fitness Integration</h3>
+                    <p className="text-sm text-blue-700">
+                      Transform your Strava activities into opportunities for spiritual growth. Import your runs, 
+                      add prayer reflections, and connect with a community that values both physical and spiritual wellness.
+                    </p>
+                    <ul className="text-sm text-blue-700 mt-3 space-y-1">
+                      <li>• Import Strava activities with detailed metrics</li>
+                      <li>• Add prayer reflections to your runs</li>
+                      <li>• Share spiritual insights with the community</li>
+                      <li>• Track both physical and spiritual progress</li>
+                    </ul>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Connect to Strava</h3>
+                    <StravaConnect onStatusChange={setStravaStatus} />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
         </TabsContent>
 
