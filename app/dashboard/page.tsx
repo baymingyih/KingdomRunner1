@@ -10,9 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { getUser, createUser, type UserProfile } from '@/lib/db/users';
-import { Loader2, Activity, Calendar, Trophy, Heart, MapPin, Clock, Target, Zap } from 'lucide-react';
+import { Loader2, Activity, Calendar, Trophy, Heart, MapPin, Clock, Target, Zap, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { StravaConnect, type StravaStatus } from '@/components/strava/StravaConnect';
+import StravaActivities from '@/components/strava/StravaActivities';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
@@ -252,10 +253,14 @@ export default function DashboardPage() {
       </motion.div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
+          </TabsTrigger>
+          <TabsTrigger value="strava" className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Strava + Prayer</span>
           </TabsTrigger>
           <TabsTrigger value="events" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
@@ -428,6 +433,61 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="strava" className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Strava + Prayer Integration
+                </CardTitle>
+                <p className="text-muted-foreground">
+                  Connect your Strava account to import activities and add prayer reflections
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="font-medium text-blue-800 mb-2">🏃‍♂️ Faith + Fitness Integration</h3>
+                  <p className="text-sm text-blue-700">
+                    Transform your Strava activities into opportunities for spiritual growth. Import your runs, 
+                    add prayer reflections, and connect with a community that values both physical and spiritual wellness.
+                  </p>
+                  <ul className="text-sm text-blue-700 mt-3 space-y-1">
+                    <li>• Import Strava activities with detailed metrics</li>
+                    <li>• Add prayer reflections to your runs</li>
+                    <li>• Share spiritual insights with the community</li>
+                    <li>• Track both physical and spiritual progress</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Step 1: Connect to Strava</h3>
+                  <StravaConnect onStatusChange={setStravaStatus} />
+                </div>
+
+                {stravaStatus?.connected && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Step 2: Import Activities & Add Prayer Reflections</h3>
+                    <StravaActivities 
+                      eventId={1} 
+                      onActivityLogged={() => {
+                        toast({
+                          title: "Activity imported!",
+                          description: "Your Strava activity has been imported with prayer reflection capabilities.",
+                        });
+                      }} 
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </TabsContent>
 
         <TabsContent value="events" className="space-y-6">
