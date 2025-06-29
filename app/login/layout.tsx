@@ -1,7 +1,7 @@
 "use client"
 
 import React, { ReactNode } from 'react';
-import { withGuest } from 'lib/auth/authGuard';
+import { withGuest } from 'lib/auth/authGuard.tsx';
 import { ComponentType } from 'react';
 
 interface LoginLayoutProps {
