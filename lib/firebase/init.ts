@@ -1,6 +1,6 @@
 "use client";
 
-import { getApps, initializeApp } from 'firebase/app';
+import { getApps, initializeApp, setLogLevel } from 'firebase/app';
 import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
@@ -8,6 +8,9 @@ import { firebaseConfig } from './config';
 
 // Initialize Firebase only if it hasn't been initialized
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+
+// Set log level to suppress non-critical warnings like future timestamp warnings
+setLogLevel('error');
 
 // Initialize Auth with persistence
 const auth = getAuth(app);
