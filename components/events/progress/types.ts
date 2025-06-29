@@ -6,6 +6,9 @@ export interface ProgressStats {
 }
 
 export interface ActivityFormData {
+  activityType: string;
+  activityDate: string;
+  activityTime: string;
   distance: string;
   hours: string;
   minutes: string;

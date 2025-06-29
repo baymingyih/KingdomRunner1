@@ -4,14 +4,43 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGES = 5; // Maximum number of images allowed
 
+// Activity type enum
+export const ACTIVITY_TYPES = [
+  'Run',
+  'Walk', 
+  'Cycle',
+  'Swim',
+  'Hike',
+  'Yoga',
+  'Gym',
+  'Other'
+] as const;
+
 export const activitySchema = z.object({
+  activityType: z.enum(ACTIVITY_TYPES, {
+    required_error: 'Please select an activity type'
+  }),
+  
+  activityDate: z.string()
+    .min(1, 'Date is required')
+    .refine((date) => {
+      const parsed = new Date(date);
+      return !isNaN(parsed.getTime());
+    }, 'Please enter a valid date'),
+    
+  activityTime: z.string()
+    .min(1, 'Time is required')
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Please enter a valid time (HH:MM)'),
+
   distance: z.string()
     .min(1, 'Distance is required')
     .transform((val) => parseFloat(val))
     .refine((val) => val > 0, 'Distance must be greater than 0'),
     
   hours: z.string()
-    .optional(),
+    .optional()
+    .default('0'),
+    
   minutes: z.string()
     .min(1, 'Minutes are required')
     .transform((val) => parseInt(val))
@@ -39,10 +68,10 @@ export const activitySchema = z.object({
 
   // Strava-specific fields
   stravaActivityId: z.string().optional(),
-  activityType: z.string().optional(),
   elevationGain: z.number().optional(),
   averageHeartRate: z.number().optional(),
   maxHeartRate: z.number().optional()
 });
 
 export type ActivityInput = z.infer<typeof activitySchema>;
+export type ActivityType = typeof ACTIVITY_TYPES[number];
