@@ -10,11 +10,18 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
     
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
     // User profiles
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow create: if request.resource.data.id == userId; // Allow initial creation
-      allow update, delete: if isOwner(userId); // Only owner can modify
+      allow create: if request.resource.data.uid == userId; // Allow initial creation
+      allow update: if isOwner(userId) || isAdmin(); // Owner or admin can modify
+      allow delete: if isAdmin(); // Only admin can delete users
     }
     
     // Activities - allow public read for social wall
@@ -35,13 +42,14 @@ service cloud.firestore {
       
       allow create: if isAuthenticated() && 
                       request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                            (resource.data.userId == request.auth.uid || isAdmin());
     }
     
     // Events
     match /events/{eventId} {
       allow read: if true;
-      allow write: if false; // Only admin can write
+      allow write: if isAdmin(); // Only admin can write events
     }
     
     // Strava tokens
