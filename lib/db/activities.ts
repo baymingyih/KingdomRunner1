@@ -12,6 +12,7 @@ import {
   limit as limitQuery
 } from 'firebase/firestore';
 import { db } from '../firebase/init';
+// Removed firebase-admin import - moved to API routes
 import { uploadActivityImage } from '../storage/uploadImage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -307,7 +308,7 @@ export async function deleteActivity(activityId: string): Promise<void> {
     await deleteDoc(doc(db, 'activities', activityId));
   } catch (error) {
     console.error('Error deleting activity:', error);
-    throw new Error('Failed to delete activity');
+    throw error instanceof Error ? error : new Error('Failed to delete activity');
   }
 }
 

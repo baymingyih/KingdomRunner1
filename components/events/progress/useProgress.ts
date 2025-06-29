@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getUserActivities, deleteActivity as deleteDbActivity, type Activity } from '@/lib/db/activities';
 import { useToast } from '@/components/ui/use-toast';
 import type { ProgressStats } from './types';
+import { auth } from '@/lib/firebase/init';
 
 export function useProgress(userId: string | undefined) {
   const [loading, setLoading] = useState(true);
@@ -36,15 +37,37 @@ export function useProgress(userId: string | undefined) {
 
   const deleteActivity = useCallback(async (activityId: string) => {
     try {
-      await deleteDbActivity(activityId);
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        throw new Error('User not authenticated');
+      }
+      
+      const response = await fetch('/api/activities/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ activityId, token }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete activity');
+      }
+
       const updatedActivities = activities.filter(a => a.id !== activityId);
       setActivities(updatedActivities);
       setStats(calculateStats(updatedActivities));
     } catch (error) {
       console.error('Error deleting activity:', error);
+      toast({
+        title: "Error deleting activity",
+        description: error instanceof Error ? error.message : 'Failed to delete activity',
+        variant: "destructive",
+      });
       throw error;
     }
-  }, [activities, calculateStats]);
+  }, [activities, calculateStats, toast]);
 
   useEffect(() => {
     async function loadActivities() {

@@ -87,7 +87,11 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
       if (data.length > 0) {
         const stravaIds = data.map((activity: RawStravaActivity) => activity.id.toString());
         const loggedActivities = await getActivitiesByStravaIds(user.uid, stravaIds);
-        setLoggedActivitiesMap(prev => new Map([...prev, ...loggedActivities]));
+        setLoggedActivitiesMap(prev => {
+          const newMap = new Map(prev);
+          loggedActivities.forEach((value, key) => newMap.set(key, value));
+          return newMap;
+        });
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not load activities';

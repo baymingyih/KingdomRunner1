@@ -1,5 +1,3 @@
-// import { cookies, type UnsafeUnwrappedCookies } from 'next/headers'; // Cannot be used in client components
-
 // Helper function to get a cookie by name from document.cookie
 function getCookie(name: string): string | undefined {
   const value = `; ${document.cookie}`;
@@ -23,6 +21,7 @@ export function getAuthCookie() {
 }
 
 export function isAuthenticated() {
+  // Client-side check only
   return !!getAuthCookie();
 }
 

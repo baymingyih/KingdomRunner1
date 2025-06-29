@@ -35,14 +35,10 @@ interface Props {
   searchParams: Promise<{ [key: string]: string }>;
 }
 
-import { isAuthenticated } from '@/lib/auth/utils';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 export default async function EventPage(props: Props) {
-  if (!isAuthenticated()) {
-    redirect('/register?message=Please sign up to join this event');
-  }
-
   const params = await props.params;
   const searchParams = await props.searchParams;
   
@@ -55,6 +51,11 @@ export default async function EventPage(props: Props) {
         <h1 className="text-2xl font-bold text-center">Event not found</h1>
       </div>
     );
+  }
+
+  const cookieStore = await cookies();
+  if (!cookieStore.get('auth_token')?.value) {
+    redirect('/register?message=Please sign up to join this event');
   }
 
   return <EventDetailClient event={event} />;
