@@ -32,6 +32,10 @@ export interface Activity {
   userName?: string;
   firstName?: string;
   lastName?: string;
+  stravaActivityId?: string; // New field for linking to Strava activities
+  elevationGain?: number;
+  averageHeartRate?: number;
+  maxHeartRate?: number;
 }
 
 export interface ActivityInput {
@@ -44,6 +48,10 @@ export interface ActivityInput {
   notes?: string;
   image?: File | null;
   images?: File[];
+  stravaActivityId?: string; // New field for linking to Strava activities
+  elevationGain?: number;
+  averageHeartRate?: number;
+  maxHeartRate?: number;
 }
 
 export async function logActivity(input: ActivityInput): Promise<Activity> {
@@ -119,6 +127,18 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
     if (imageUrls.length > 0) {
       activityData.imageUrls = imageUrls;
     }
+    if (input.stravaActivityId) {
+      activityData.stravaActivityId = input.stravaActivityId;
+    }
+    if (input.elevationGain !== undefined) {
+      activityData.elevationGain = input.elevationGain;
+    }
+    if (input.averageHeartRate !== undefined) {
+      activityData.averageHeartRate = input.averageHeartRate;
+    }
+    if (input.maxHeartRate !== undefined) {
+      activityData.maxHeartRate = input.maxHeartRate;
+    }
 
     const docRef = await addDoc(collection(db, 'activities'), activityData);
     
@@ -128,8 +148,61 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
       timestamp: new Date()
     };
   } catch (error) {
-    console.error('Error getting user activities:', error);
-    throw new Error('Failed to load activities');
+    console.error('Error logging activity:', error);
+    throw new Error('Failed to log activity');
+  }
+}
+
+export async function getActivitiesByStravaIds(userId: string, stravaActivityIds: string[]): Promise<Map<string, Activity>> {
+  try {
+    if (!stravaActivityIds.length) {
+      return new Map();
+    }
+
+    const activitiesRef = collection(db, 'activities');
+    const q = query(
+      activitiesRef,
+      where('userId', '==', userId),
+      where('stravaActivityId', 'in', stravaActivityIds)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const activitiesMap = new Map<string, Activity>();
+    
+    querySnapshot.docs.forEach(docSnapshot => {
+      const data = docSnapshot.data();
+      const activity: Activity = {
+        id: docSnapshot.id,
+        userId: data.userId,
+        eventId: data.eventId,
+        distance: data.distance,
+        hours: data.hours,
+        minutes: data.minutes,
+        duration: data.duration,
+        location: data.location,
+        timestamp: data.timestamp.toDate(),
+        notes: data.notes,
+        imageUrl: data.imageUrl,
+        imageUrls: data.imageUrls,
+        userAvatar: data.userAvatar,
+        userName: data.userName,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        stravaActivityId: data.stravaActivityId,
+        elevationGain: data.elevationGain,
+        averageHeartRate: data.averageHeartRate,
+        maxHeartRate: data.maxHeartRate
+      };
+      
+      if (activity.stravaActivityId) {
+        activitiesMap.set(activity.stravaActivityId, activity);
+      }
+    });
+    
+    return activitiesMap;
+  } catch (error) {
+    console.error('Error getting activities by Strava IDs:', error);
+    throw new Error('Failed to load activities by Strava IDs');
   }
 }
 
@@ -161,7 +234,11 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
           duration: durationInMinutes,
           location: activityData.location,
           timestamp: activityData.timestamp.toDate(),
-          notes: activityData.notes || undefined
+          notes: activityData.notes || undefined,
+          stravaActivityId: activityData.stravaActivityId,
+          elevationGain: activityData.elevationGain,
+          averageHeartRate: activityData.averageHeartRate,
+          maxHeartRate: activityData.maxHeartRate
         };
         
         // Include imageUrl and imageUrls if they exist
@@ -197,6 +274,10 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
           duration: durationInMinutes,
           location: activityData.location,
           timestamp: activityData.timestamp.toDate(),
+          stravaActivityId: activityData.stravaActivityId,
+          elevationGain: activityData.elevationGain,
+          averageHeartRate: activityData.averageHeartRate,
+          maxHeartRate: activityData.maxHeartRate
         };
         
         // Include imageUrl and imageUrls if they exist
@@ -275,6 +356,10 @@ export async function getAllActivities(limit: number = 10): Promise<Activity[]> 
         duration: durationInMinutes,
         location: data.location,
         timestamp: timestamp,
+        stravaActivityId: data.stravaActivityId,
+        elevationGain: data.elevationGain,
+        averageHeartRate: data.averageHeartRate,
+        maxHeartRate: data.maxHeartRate
       };
       
       // Include optional fields if they exist
@@ -400,6 +485,10 @@ export async function getUserActivities(userId: string): Promise<Activity[]> {
         duration: durationInMinutes,
         location: data.location,
         timestamp: timestamp,
+        stravaActivityId: data.stravaActivityId,
+        elevationGain: data.elevationGain,
+        averageHeartRate: data.averageHeartRate,
+        maxHeartRate: data.maxHeartRate
       };
       
       // Include optional fields if they exist
