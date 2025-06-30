@@ -11,7 +11,7 @@ import { LoadingSpinner } from './progress/LoadingSpinner';
 import { ErrorDisplay } from './progress/ErrorDisplay';
 
 interface EventSocialWallProps {
-  eventId: number;
+  eventId: string;
 }
 
 export function EventSocialWall({ eventId }: EventSocialWallProps) {
@@ -27,7 +27,7 @@ export function EventSocialWall({ eventId }: EventSocialWallProps) {
     submitActivity,
     loadMoreActivities,
     hasMore
-  } = useSocialWall(eventId.toString());
+  } = useSocialWall(eventId);
 
   if (loading) {
     return (
@@ -66,7 +66,7 @@ export function EventSocialWall({ eventId }: EventSocialWallProps) {
     <div className="space-y-6">
       {user && (
         <ActivitySubmissionForm 
-          eventId={eventId.toString()} 
+          eventId={eventId} 
           onSubmit={submitActivity} 
         />
       )}

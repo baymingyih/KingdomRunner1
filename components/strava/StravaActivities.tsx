@@ -38,7 +38,7 @@ interface RawStravaActivity {
 }
 
 interface StravaActivitiesProps {
-  eventId: number;
+  eventId: string;
   onActivityLogged: () => void;
 }
 
@@ -116,50 +116,28 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
     fetchActivities(nextPage);
   };
 
-  const handleImport = async (activity: RawStravaActivity) => {
-    if (!user) return;
+  const handleImport = (activity: RawStravaActivity) => {
+    console.log('Import button clicked for activity:', activity.id);
+    console.log('Current expanded activities before update:', Array.from(expandedActivities));
     
-    setImporting(activity.id);
     try {
-      // Convert seconds to hours and minutes
-      const totalMinutes = Math.floor(activity.moving_time / 60);
-      const hours = Math.floor(totalMinutes / 60).toString();
-      const minutes = (totalMinutes % 60).toString();
-      
-      const loggedActivity = await logActivity({
-        userId: user.uid,
-        eventId: eventId.toString(),
-        distance: (activity.distance / 1000).toString(), // Convert meters to kilometers
-        hours,
-        minutes,
-        location: [activity.location_city, activity.location_country].filter(Boolean).join(', ') || 'Unknown location',
-        notes: `Imported from Strava: ${activity.name} (Type: ${activity.type}, Elevation: ${Math.round(activity.total_elevation_gain)}m${activity.average_heartrate ? `, Avg HR: ${Math.round(activity.average_heartrate)} bpm` : ''})`,
-        images: [],
-        stravaActivityId: activity.id.toString(),
-        elevationGain: activity.total_elevation_gain,
-        averageHeartRate: activity.average_heartrate,
-        maxHeartRate: activity.max_heartrate
+      // Just expand the form without submitting data
+      setExpandedActivities(prev => {
+        const newSet = new Set(prev);
+        newSet.add(activity.id);
+        console.log('Updated expanded activities:', Array.from(newSet));
+        return newSet;
       });
-
-      // Update the logged activities map
-      setLoggedActivitiesMap(prev => new Map(prev.set(activity.id.toString(), loggedActivity)));
-
-      toast({
-        title: "Activity imported",
-        description: "Your Strava activity has been successfully logged.",
-      });
-
-      onActivityLogged();
     } catch (error) {
-      toast({
-        title: "Import failed",
-        description: "Failed to import activity. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setImporting(null);
+      console.error('Error in handleImport:', error);
     }
+
+    // Force a state update to ensure re-render
+    forceUpdate({});
   };
+
+  // Add forceUpdate hook with proper typing
+  const [, forceUpdate] = useState<{}>({});
 
   const toggleExpanded = (activityId: number) => {
     setExpandedActivities(prev => {
@@ -281,9 +259,13 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
                     
                     {!isImported && (
                       <Button
-                        onClick={() => handleImport(activity)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleImport(activity);
+                        }}
                         disabled={importing === activity.id}
                         className="gap-2"
+                        data-testid={`import-button-${activity.id}`}
                       >
                         {importing === activity.id ? (
                           <>
@@ -298,6 +280,104 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
                   </div>
 
                   <AnimatePresence>
+                    {isExpanded && !isImported && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-4"
+                      >
+                        <Separator className="mb-4" />
+                        <ActivitySubmissionForm 
+                          eventId={eventId.toString()}
+                          initialActivity={{
+                            userId: user?.uid || '',
+                            eventId: eventId.toString(),
+                            distance: parseFloat((activity.distance / 1000).toFixed(2)),
+                            hours: Math.floor(activity.moving_time / 3600),
+                            minutes: Math.floor((activity.moving_time % 3600) / 60),
+                            duration: Math.floor(activity.moving_time / 60),
+                            location: [activity.location_city, activity.location_country].filter(Boolean).join(', ') || 'Unknown location',
+                            notes: '',
+                            timestamp: new Date(),
+                            stravaActivityId: activity.id.toString(),
+                            elevationGain: activity.total_elevation_gain,
+                            averageHeartRate: activity.average_heartrate,
+                            maxHeartRate: activity.max_heartrate
+                          }}
+                          onSubmit={async (data) => {
+                            try {
+                              if (!user) return;
+                              
+                              setImporting(activity.id);
+                              
+                              // Submit both activity and reflection
+                              await logActivity({
+                                userId: user.uid,
+                                eventId: eventId.toString(),
+                                distance: data.distance,
+                                hours: data.hours,
+                                minutes: data.minutes,
+                                location: data.location,
+                                notes: data.notes,
+                                images: data.images,
+                                stravaActivityId: activity.id.toString(),
+                                elevationGain: activity.total_elevation_gain,
+                                averageHeartRate: activity.average_heartrate,
+                                maxHeartRate: activity.max_heartrate
+                              });
+                              
+                              // Update the logged activities map
+                              const newActivity: Activity = {
+                                userId: user.uid,
+                                eventId: eventId.toString(),
+                                distance: parseFloat(data.distance),
+                                hours: parseInt(data.hours),
+                                minutes: parseInt(data.minutes),
+                                duration: parseInt(data.hours) * 60 + parseInt(data.minutes),
+                                location: data.location,
+                                notes: data.notes,
+                                timestamp: new Date(),
+                                stravaActivityId: activity.id.toString(),
+                                elevationGain: activity.total_elevation_gain,
+                                averageHeartRate: activity.average_heartrate,
+                                maxHeartRate: activity.max_heartrate
+                              };
+                              
+                              setLoggedActivitiesMap(prev => {
+                                const newMap = new Map(prev);
+                                newMap.set(activity.id.toString(), newActivity);
+                                return newMap;
+                              });
+                              
+                              // Collapse the form
+                              setExpandedActivities(prev => {
+                                const newSet = new Set(prev);
+                                newSet.delete(activity.id);
+                                return newSet;
+                              });
+                              
+                              onActivityLogged();
+                              toast({
+                                title: "Activity imported successfully",
+                                description: "Your Strava activity has been imported with your reflection",
+                              });
+                            } catch (error) {
+                              console.error('Error importing activity:', error);
+                              toast({
+                                title: "Error saving activity",
+                                description: "Failed to save your activity and reflection. Please try again.",
+                                variant: "destructive",
+                              });
+                            } finally {
+                              setImporting(null);
+                            }
+                          }}
+                          autoFocus
+                        />
+                      </motion.div>
+                    )}
                     {isImported && isExpanded && loggedActivity && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
@@ -351,14 +431,43 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
                             {/* Activity Submission Form for adding reflections */}
                             <ActivitySubmissionForm 
                               eventId={eventId.toString()}
+                              initialActivity={loggedActivity}
                               onSubmit={async (data) => {
-                                // This would update the existing activity with new reflection
-                                // For now, we'll just show a toast
-                                toast({
-                                  title: "Reflection added",
-                                  description: "Your prayer reflection has been added to this activity.",
-                                });
+                                try {
+                                  if (!user) return;
+                                  
+                                  // Convert activity data
+                                  const totalMinutes = Math.floor(activity.moving_time / 60);
+                                  const hours = Math.floor(totalMinutes / 60).toString();
+                                  const minutes = (totalMinutes % 60).toString();
+                                  
+                                  // Submit both activity and reflection
+                                  await logActivity({
+                                    userId: user.uid,
+                                    eventId: eventId.toString(),
+                                    distance: (activity.distance / 1000).toString(),
+                                    hours,
+                                    minutes,
+                                    location: [activity.location_city, activity.location_country].filter(Boolean).join(', ') || 'Unknown location',
+                                    notes: data.notes,
+                                    images: data.images,
+                                    stravaActivityId: activity.id.toString(),
+                                    elevationGain: activity.total_elevation_gain,
+                                    averageHeartRate: activity.average_heartrate,
+                                    maxHeartRate: activity.max_heartrate
+                                  });
+                                  
+                                  // Redirect to social wall
+                                  window.location.href = `/social-wall?eventId=${eventId}`;
+                                } catch (error) {
+                                  toast({
+                                    title: "Error saving activity",
+                                    description: "Failed to save your activity and reflection. Please try again.",
+                                    variant: "destructive",
+                                  });
+                                }
                               }}
+                              autoFocus
                             />
                             
                             {/* Social Activity Feed */}

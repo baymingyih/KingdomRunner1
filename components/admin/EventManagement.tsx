@@ -16,7 +16,8 @@ import {
   Save,
   X
 } from 'lucide-react';
-import { events, type Event } from '@/lib/data/events';
+import { type Event, createEvent } from '@/lib/data/events';
+import { getEvents, updateEvent, deleteEvent } from '@/lib/db/events';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Dialog,
@@ -46,7 +47,26 @@ interface EventFormData {
 }
 
 export function EventManagement() {
-  const [eventList, setEventList] = useState<Event[]>(events);
+  const [eventList, setEventList] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const events = await getEvents();
+        setEventList(events);
+      } catch (err) {
+        setError('Failed to load events');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<Event | null>(null);
@@ -71,7 +91,7 @@ export function EventManagement() {
     });
   };
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
     if (!formData.name || !formData.startDate || !formData.endDate) {
       toast({
         title: "Validation Error",
@@ -81,28 +101,32 @@ export function EventManagement() {
       return;
     }
 
-    const newEvent: Event = {
-      id: Math.max(...eventList.map(e => e.id)) + 1,
-      name: formData.name,
-      description: formData.description,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
-      theme: formData.theme,
-      image: formData.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
-      participants: 0,
-      prayerGuide: [],
-      leaderboard: [],
-      prayers: []
-    };
+    try {
+      const eventData = {
+        name: formData.name,
+        description: formData.description,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        theme: formData.theme,
+        image: formData.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
+      };
+      const newEvent = await createEvent(eventData as Omit<Event, 'id'>);
 
-    setEventList([...eventList, newEvent]);
-    setShowCreateDialog(false);
-    resetForm();
-    
-    toast({
-      title: "Event Created",
-      description: `${newEvent.name} has been created successfully`,
-    });
+      setEventList([...eventList, newEvent]);
+      setShowCreateDialog(false);
+      resetForm();
+      
+      toast({
+        title: "Event Created",
+        description: `${newEvent.name} has been created successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error Creating Event",
+        description: "Failed to create event. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditEvent = (event: Event) => {
@@ -117,34 +141,57 @@ export function EventManagement() {
     });
   };
 
-  const handleUpdateEvent = () => {
+  const handleUpdateEvent = async () => {
     if (!editingEvent) return;
 
-    const updatedEvents = eventList.map(event =>
-      event.id === editingEvent.id
-        ? { ...event, ...formData }
-        : event
-    );
+    try {
+      const updatedEvent = {
+        ...editingEvent,
+        ...formData
+      };
+      await updateEvent(updatedEvent);
+      
+      const updatedEvents = eventList.map(event =>
+        event.id === editingEvent.id
+          ? updatedEvent
+          : event
+      );
 
-    setEventList(updatedEvents);
-    setEditingEvent(null);
-    resetForm();
-    
-    toast({
-      title: "Event Updated",
-      description: `${formData.name} has been updated successfully`,
-    });
+      setEventList(updatedEvents);
+      setEditingEvent(null);
+      resetForm();
+      
+      toast({
+        title: "Event Updated",
+        description: `${formData.name} has been updated successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error Updating Event",
+        description: "Failed to update event. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteEvent = (event: Event) => {
-    const updatedEvents = eventList.filter(e => e.id !== event.id);
-    setEventList(updatedEvents);
-    setShowDeleteDialog(null);
-    
-    toast({
-      title: "Event Deleted",
-      description: `${event.name} has been deleted`,
-    });
+  const handleDeleteEvent = async (event: Event) => {
+    try {
+      await deleteEvent(event.id);
+      const updatedEvents = eventList.filter(e => e.id !== event.id);
+      setEventList(updatedEvents);
+      setShowDeleteDialog(null);
+      
+      toast({
+        title: "Event Deleted",
+        description: `${event.name} has been deleted`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error Deleting Event",
+        description: "Failed to delete event. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getEventStatus = (event: Event) => {

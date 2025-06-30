@@ -66,3 +66,22 @@ export function removeAuthCookie() {
   
   console.log('Auth cookies removed. Current cookies:', document.cookie);
 }
+
+export async function verifyAdmin(req: Request): Promise<boolean> {
+  try {
+    const authToken = req.headers.get('Authorization')?.split('Bearer ')[1];
+    if (!authToken) return false;
+    
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-admin`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+    
+    return response.ok;
+  } catch (error) {
+    console.error('Admin verification failed:', error);
+    return false;
+  }
+}

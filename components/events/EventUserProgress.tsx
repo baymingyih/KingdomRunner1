@@ -17,7 +17,7 @@ import { StravaConnect, type StravaStatus } from '@/components/strava/StravaConn
 import type { ActivityFormData } from './progress/types';
 
 interface EventUserProgressProps {
-  eventId: number;
+  eventId: string;
 }
 
 export function EventUserProgress({ eventId }: EventUserProgressProps) {
@@ -25,7 +25,7 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
   const [stravaStatus, setStravaStatus] = useState<StravaStatus | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { loading, error, activities, stats, updateActivities, deleteActivity } = useProgress(user?.uid);
+  const { loading, error, activities, stats, updateActivities, deleteActivity } = useProgress(user?.uid, eventId);
 
   const handleSubmit = async (data: ActivityFormData) => {
     if (!user) return;

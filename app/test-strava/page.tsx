@@ -93,7 +93,7 @@ export default function TestStravaPage() {
                 </ul>
               </div>
               <StravaActivities 
-                eventId={1} 
+                eventId="1" 
                 onActivityLogged={() => {
                   // Handle activity logged
                 }} 

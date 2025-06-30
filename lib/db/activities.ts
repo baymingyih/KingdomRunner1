@@ -442,14 +442,18 @@ export async function getAllActivities(limit: number = 10): Promise<Activity[]> 
   }
 }
 
-export async function getUserActivities(userId: string): Promise<Activity[]> {
+export async function getUserActivities(userId: string, eventId?: string): Promise<Activity[]> {
   try {
     // Create a query to get activities for this user
     const activitiesRef = collection(db, 'activities');
-    const q = query(
+    let q = query(
       activitiesRef,
       where('userId', '==', userId)
     );
+
+    if (eventId) {
+      q = query(q, where('eventId', '==', eventId));
+    }
     
     const querySnapshot = await getDocs(q);
     

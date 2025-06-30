@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import type { ProgressStats } from './types';
 import { auth } from '@/lib/firebase/init';
 
-export function useProgress(userId: string | undefined) {
+export function useProgress(userId: string | undefined, eventId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -77,7 +77,7 @@ export function useProgress(userId: string | undefined) {
       }
 
       try {
-        const userActivities = await getUserActivities(userId);
+        const userActivities = await getUserActivities(userId, eventId);
         setActivities(userActivities);
         setStats(calculateStats(userActivities));
       } catch (error) {

@@ -442,39 +442,153 @@ export default function DashboardPage() {
             transition={{ delay: 0.2 }}
           >
             {stravaStatus?.connected ? (
-              <StravaReflectionDashboard eventId={1} />
+              <div className="space-y-6">
+                {/* Stats Overview Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-orange-700">Imported Runs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-orange-900">
+                        {loadingActivities ? (
+                          <Loader2 className="h-6 w-6 animate-spin inline" />
+                        ) : (
+                          stravaStats?.weeklyRuns || mockStravaStats.weeklyRuns
+                        )}
+                      </div>
+                      <p className="text-xs text-orange-600 mt-1">with reflections</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-purple-700">Prayer Insights</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-purple-900">12</div>
+                      <p className="text-xs text-purple-600 mt-1">spiritual reflections</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-green-700">Faith Miles</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-900">
+                        {loadingActivities ? (
+                          <Loader2 className="h-6 w-6 animate-spin inline" />
+                        ) : (
+                          stravaStats?.totalDistance || mockStravaStats.totalDistance
+                        )} km
+                      </div>
+                      <p className="text-xs text-green-600 mt-1">with prayer</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-blue-700">Spiritual Growth</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-blue-900">85%</div>
+                      <p className="text-xs text-blue-600 mt-1">reflection rate</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Main Content */}
+                <StravaReflectionDashboard eventId={1} />
+              </div>
             ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
-                    Strava + Prayer Integration
-                  </CardTitle>
-                  <p className="text-muted-foreground">
-                    Connect your Strava account to import activities and add prayer reflections
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <h3 className="font-medium text-blue-800 mb-2">🏃‍♂️ Faith + Fitness Integration</h3>
-                    <p className="text-sm text-blue-700">
-                      Transform your Strava activities into opportunities for spiritual growth. Import your runs, 
-                      add prayer reflections, and connect with a community that values both physical and spiritual wellness.
-                    </p>
-                    <ul className="text-sm text-blue-700 mt-3 space-y-1">
-                      <li>• Import Strava activities with detailed metrics</li>
-                      <li>• Add prayer reflections to your runs</li>
-                      <li>• Share spiritual insights with the community</li>
-                      <li>• Track both physical and spiritual progress</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Connect to Strava</h3>
-                    <StravaConnect onStatusChange={setStravaStatus} />
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Plus className="h-5 w-5" />
+                        Strava + Prayer Integration
+                      </CardTitle>
+                      <p className="text-muted-foreground">
+                        Connect your Strava account to import activities and add prayer reflections
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h3 className="font-medium text-blue-800 mb-2">🏃‍♂️ Faith + Fitness Integration</h3>
+                        <p className="text-sm text-blue-700">
+                          Transform your Strava activities into opportunities for spiritual growth. Import your runs, 
+                          add prayer reflections, and connect with a community that values both physical and spiritual wellness.
+                        </p>
+                        <ul className="text-sm text-blue-700 mt-3 space-y-1">
+                          <li>• Import Strava activities with detailed metrics</li>
+                          <li>• Add prayer reflections to your runs</li>
+                          <li>• Share spiritual insights with the community</li>
+                          <li>• Track both physical and spiritual progress</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Connect to Strava</h3>
+                        <StravaConnect onStatusChange={setStravaStatus} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Heart className="h-5 w-5" />
+                        What You'll Get
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                          <Activity className="h-5 w-5 text-primary mt-0.5" />
+                          <div>
+                            <h4 className="font-medium">Automatic Import</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Your Strava runs are automatically imported with all metrics
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                          <Heart className="h-5 w-5 text-primary mt-0.5" />
+                          <div>
+                            <h4 className="font-medium">Prayer Reflections</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Add spiritual insights and prayers to each run
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                          <Trophy className="h-5 w-5 text-primary mt-0.5" />
+                          <div>
+                            <h4 className="font-medium">Community Sharing</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Share your faith journey with fellow runners
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </div>
             )}
           </motion.div>
         </TabsContent>

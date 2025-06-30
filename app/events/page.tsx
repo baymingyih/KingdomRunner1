@@ -2,9 +2,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { events } from '@/lib/data/events';
+import { adminFirestore } from '@/lib/firebase/admin';
 
-export default function EventsPage() {
+interface Event {
+  id: string;
+  name: string;
+  startDate: string | Date;
+  endDate: string | Date;
+  description: string;
+  image: string;
+  theme?: string;
+  participants?: number;
+}
+
+export default async function EventsPage() {
+  const eventsSnapshot = await adminFirestore.collection('events').get();
+  const events = eventsSnapshot.docs.map(doc => ({
+    id: doc.id,
+    name: doc.data().name,
+    startDate: doc.data().startDate,
+    endDate: doc.data().endDate,
+    description: doc.data().description,
+    image: doc.data().image || '/default-event.jpg',
+    theme: doc.data().theme,
+    participants: doc.data().participants
+  } as Event));
+  
+  if (!events || events.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold text-center mb-8">Upcoming Events</h1>
+        <p className="text-center">No upcoming events found</p>
+      </div>
+    );
+  }
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-center mb-8">Upcoming Events</h1>

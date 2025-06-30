@@ -228,7 +228,7 @@ export function UserManagement() {
             <AlertDialogDescription>
               {showAdminDialog?.action === 'grant' 
                 ? `Are you sure you want to grant admin privileges to ${showAdminDialog.user.firstName} ${showAdminDialog.user.lastName}? They will have access to all admin features.`
-                : `Are you sure you want to revoke admin privileges from ${showAdminDialog.user.firstName} ${showAdminDialog.user.lastName}? They will lose access to admin features.`
+                : `Are you sure you want to revoke admin privileges from ${showAdminDialog?.user.firstName} ${showAdminDialog?.user.lastName}? They will lose access to admin features.`
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
