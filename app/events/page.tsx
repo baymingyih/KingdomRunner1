@@ -58,10 +58,23 @@ export default async function EventsPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
               </p>
-              <p className="mb-4">{event.description}</p>
-              <Button className="w-full">
-                <Link href={`/events/${event.id}`}>View Details</Link>
-              </Button>
+              <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
+                {event.description}
+              </p>
+              <div className="flex gap-2">
+                <Link
+                  href={`/events/${event.id}`}
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full"
+                >
+                  Read More
+                </Link>
+                <Link
+                  href={`/events/${event.id}`}
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
+                >
+                  Join Event
+                </Link>
+              </div>
             </CardContent>
           </Card>
         ))}

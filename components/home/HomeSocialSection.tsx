@@ -9,7 +9,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function HomeSocialSection() {
   const { user } = useAuth();
-  const { activities, loading } = useGlobalSocialWall(3);
+  const { activities, loading } = useGlobalSocialWall(5);
 
   // Don't render anything if user is not logged in
   if (!user) {
@@ -41,7 +41,7 @@ export default function HomeSocialSection() {
         </Link>
       </div>
       
-      <HomeSocialFeed activities={activities} limit={3} />
+      <HomeSocialFeed activities={activities} />
     </section>
   );
 }

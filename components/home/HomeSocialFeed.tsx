@@ -12,14 +12,10 @@ import { GlobalSocialActivity } from './useGlobalSocialWall';
 
 interface HomeSocialFeedProps {
   activities: GlobalSocialActivity[];
-  limit?: number;
 }
 
-export function HomeSocialFeed({ activities, limit = 3 }: HomeSocialFeedProps) {
-  // Limit the number of activities to display
-  const displayActivities = activities.slice(0, limit);
-
-  if (displayActivities.length === 0) {
+export function HomeSocialFeed({ activities }: HomeSocialFeedProps) {
+  if (activities.length === 0) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
@@ -33,7 +29,7 @@ export function HomeSocialFeed({ activities, limit = 3 }: HomeSocialFeedProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <AnimatePresence>
-        {displayActivities.map((activity) => (
+        {activities.map((activity) => (
           <motion.div
             key={activity.id}
             initial={{ opacity: 0, y: 20 }}

@@ -312,14 +312,17 @@ export async function deleteActivity(activityId: string): Promise<void> {
   }
 }
 
-export async function getAllActivities(limit: number = 10): Promise<Activity[]> {
+export async function getAllActivities(limit?: number): Promise<Activity[]> {
   try {
     const activitiesRef = collection(db, 'activities');
-    const q = query(
+    let q = query(
       activitiesRef,
-      orderBy('timestamp', 'desc'),
-      limitQuery(limit)
+      orderBy('timestamp', 'desc')
     );
+    
+    if (limit) {
+      q = query(q, limitQuery(limit));
+    }
     
     const querySnapshot = await getDocs(q);
     

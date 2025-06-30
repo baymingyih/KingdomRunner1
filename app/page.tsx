@@ -1,5 +1,4 @@
 import Hero from '@/components/Hero';
-import EventCountdown from '@/components/EventCountdown';
 import DailyPrayer from '@/components/DailyPrayer';
 import FeaturedEvents from '@/components/FeaturedEvents';
 import { RunGuide } from '@/components/runs/RunGuide';
@@ -10,7 +9,7 @@ export default function Home() {
     <main>
       <Hero />
       <div className="container mx-auto px-4">
-        <EventCountdown />
+        <FeaturedEvents />
         <HomeSocialSection />
         <DailyPrayer />
         <RunGuide />

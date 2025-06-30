@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { 
   getAllActivities, 
@@ -22,11 +22,10 @@ export interface GlobalSocialActivity extends Activity {
   lastName?: string;
 }
 
-export function useGlobalSocialWall(limit: number = 10) {
+export function useGlobalSocialWall(limit = 5) {
   const [activities, setActivities] = useState<GlobalSocialActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [hasMore, setHasMore] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(Date.now());
   const { user } = useAuth();
 
@@ -58,10 +57,13 @@ export function useGlobalSocialWall(limit: number = 10) {
   const fetchActivities = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('Fetching all activities...');
       const allActivities = await getAllActivities(limit);
+      console.log(`Fetched ${allActivities.length} activities (limit: ${limit})`, allActivities);
       
       // Get social data for all activities
       const activityIds = allActivities.map(activity => activity.id!);
+      console.log('Activity IDs for social data:', activityIds);
       
       // Only try to fetch social data if we have activities and a user (authenticated)
       let socialData: Record<string, {
@@ -73,7 +75,9 @@ export function useGlobalSocialWall(limit: number = 10) {
         commentCount?: number;
       }> = {};
       if (activityIds.length > 0 && user) {
+        console.log('Fetching social data...');
         socialData = await fetchSocialData(activityIds);
+        console.log('Fetched social data:', socialData);
       }
       
       // Transform activities to include social features
@@ -117,7 +121,7 @@ export function useGlobalSocialWall(limit: number = 10) {
         );
       }
       
-      console.log('Fetched activities with complete user data:', socialActivities.map(a => ({
+      console.log(`Final activities count: ${socialActivities.length}`, socialActivities.map(a => ({
         id: a.id,
         userId: a.userId,
         userName: a.userName,
@@ -127,7 +131,6 @@ export function useGlobalSocialWall(limit: number = 10) {
         hasName: !!(a.firstName || a.lastName || a.userName)
       })));
       setActivities(socialActivities);
-      setHasMore(allActivities.length >= limit);
       // Update the last refresh time
       setLastRefreshTime(Date.now());
     } catch (error) {
@@ -137,12 +140,12 @@ export function useGlobalSocialWall(limit: number = 10) {
     } finally {
       setLoading(false);
     }
-  }, [limit, fetchSocialData, user]);
+  }, [fetchSocialData, user]);
 
   // Initial load and refresh when lastRefreshTime changes
   useEffect(() => {
     fetchActivities();
-  }, [fetchActivities, lastRefreshTime]);
+  }, [lastRefreshTime]); // Removed fetchActivities from dependencies since it's stable
 
   // Function to manually trigger a refresh
   const refreshActivities = useCallback(() => {
@@ -150,12 +153,14 @@ export function useGlobalSocialWall(limit: number = 10) {
     setLastRefreshTime(Date.now());
   }, []);
 
-  return {
+  // Memoize the returned object to prevent unnecessary re-renders
+  const result = useMemo(() => ({
     activities,
     loading,
     error,
-    hasMore,
     refreshActivities,
-    fetchActivities // Expose the original fetch function as well
-  };
+    fetchActivities
+  }), [activities, loading, error, refreshActivities, fetchActivities]);
+
+  return result;
 }

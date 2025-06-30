@@ -12,7 +12,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function SocialWallPage() {
   const [activeTab, setActiveTab] = useState<'latest' | 'popular'>('latest');
-  const { activities, loading, error, hasMore } = useGlobalSocialWall(20);
+  const { activities, loading, error } = useGlobalSocialWall(20);
   const { user } = useAuth();
 
   if (loading) {
@@ -66,14 +66,6 @@ export default function SocialWallPage() {
           currentUser={user}
         />
         
-        {hasMore && (
-          <Button 
-            onClick={() => {}}
-            className="w-full mt-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
-          >
-            Load More
-          </Button>
-        )}
         
         {!user && (
           <div className="text-center py-4 mt-6 border-t">

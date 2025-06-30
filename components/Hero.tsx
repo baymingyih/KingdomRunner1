@@ -14,14 +14,14 @@ export default function Hero() {
             backgroundImage: "url('https://firebasestorage.googleapis.com/v0/b/kingdomrunnersdv1/o/tempimg%2FWhatsApp%20Image%202025-04-14%20at%2010.51.48%20PM.jpeg?alt=media&token=165e7ed4-89a3-462a-882a-cf43b4b68017')"
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20" />
       </div>
       <div className="relative z-10 text-center">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-4xl md:text-6xl font-bold mb-4"
+          className="text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg"
         >
           Run with Purpose, Pray with Passion
         </motion.h1>
@@ -29,7 +29,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-xl mb-8"
+          className="text-xl mb-8 text-white/90 drop-shadow"
         >
           Join our global community of runners united in faith
         </motion.p>

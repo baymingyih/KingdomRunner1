@@ -84,25 +84,11 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
     <div className="space-y-6">
       <ProgressStats stats={stats} />
       
-      <Tabs defaultValue="manual" className="w-full">
+      <Tabs defaultValue="strava" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="manual">Manual Entry</TabsTrigger>
           <TabsTrigger value="strava">Strava Integration</TabsTrigger>
+          <TabsTrigger value="manual">Manual Entry</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="manual" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ActivityForm 
-              onSubmit={handleSubmit}
-              submitting={submitting}
-            />
-            
-            <RecentRuns 
-              activities={activities}
-              onDelete={deleteActivity}
-            />
-          </div>
-        </TabsContent>
         
         <TabsContent value="strava" className="space-y-6">
           <div className="space-y-4">
@@ -128,6 +114,20 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
                 />
               </div>
             )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="manual" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ActivityForm 
+              onSubmit={handleSubmit}
+              submitting={submitting}
+            />
+            
+            <RecentRuns 
+              activities={activities}
+              onDelete={deleteActivity}
+            />
           </div>
         </TabsContent>
       </Tabs>

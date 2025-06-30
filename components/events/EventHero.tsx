@@ -4,8 +4,15 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { type Event } from '@/lib/data/events';
+
+function formatDate(date: Date): string {
+  const day = format(date, 'do');
+  const monthYear = format(date, 'MMMM yyyy');
+  return `${day} ${monthYear}`;
+}
 
 export function EventHero({ event }: { event: Event }) {
   const startDate = new Date(event.startDate);
@@ -17,7 +24,7 @@ export function EventHero({ event }: { event: Event }) {
     <div className="relative w-full h-[500px] rounded-xl overflow-hidden mb-8">
       <div className="absolute inset-0 bg-black/60 z-10" />
       <Image
-        src="https://firebasestorage.googleapis.com/v0/b/kingdomrunnersdv1/o/events%2F1%2Fcover%2F1744597774563-WhatsApp%20Image%202025-04-13%20at%203.06.29%20PM.jpeg?alt=media&token=93d482a6-854f-4432-9bf8-201570f4f256"
+        src={event.image || '/default-event.jpg'}
         alt={event.name}
         fill
         className="object-cover"
@@ -40,10 +47,10 @@ export function EventHero({ event }: { event: Event }) {
         >
           <Badge variant="secondary" className="text-lg py-1.5">
             <Calendar className="w-4 h-4 mr-2" />
-            14th April to 24th May 2025
+            {formatDate(startDate)} to {formatDate(endDate)}
           </Badge>
           {isOngoing && (
-            <Badge variant="secondary" className="text-lg py-1.5 bg-green-500/10 text-green-500">
+            <Badge variant="secondary" className="text-lg py-1.5 dark:bg-green-900/30 dark:text-green-300">
               <Clock className="w-4 h-4 mr-2" />
               Event in Progress
             </Badge>

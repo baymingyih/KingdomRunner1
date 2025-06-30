@@ -14,7 +14,7 @@ export function useProgress(userId: string | undefined, eventId?: string) {
     totalDistance: 0,
     targetDistance: 100,
     totalActivities: 0,
-    targetActivities: 21
+    targetActivities: 40
   });
   
   const { toast } = useToast();
@@ -25,7 +25,7 @@ export function useProgress(userId: string | undefined, eventId?: string) {
       totalDistance,
       targetDistance: 100,
       totalActivities: activities.length,
-      targetActivities: 21
+      targetActivities: 40
     };
   }, []);
 
