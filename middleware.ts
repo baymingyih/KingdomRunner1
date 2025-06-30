@@ -8,16 +8,17 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Define protected and auth routes
-    const isProtectedRoute = pathname.startsWith('/dashboard');
+    const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+    const isAdminRoute = pathname.startsWith('/admin');
     const isAuthRoute = ['/login', '/register', '/forgot-password'].includes(pathname);
 
-    // Redirect logic
+    // Redirect logic for protected routes
     if (isProtectedRoute && !token) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Removed automatic redirect from auth routes to dashboard
-    // Users can now stay on login page after signing in
+    // For admin routes, we'll let the client-side AdminGuard handle the admin check
+    // since we can't verify admin status in middleware without making database calls
 
     return NextResponse.next();
   } catch (error) {
@@ -29,6 +30,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/admin/:path*',
     '/login',
     '/register',
     '/forgot-password'

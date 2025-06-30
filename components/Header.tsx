@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ModeToggle } from './mode-toggle';
 import { Button } from './ui/button';
-import { Menu, LogOut } from 'lucide-react';
+import { Menu, LogOut, Shield } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePathname, useRouter } from 'next/navigation';
@@ -23,6 +24,8 @@ import { useAuth } from './auth/AuthProvider';
 import { signOut } from '@/lib/auth';
 import { useToast } from './ui/use-toast';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { useState, useEffect } from 'react';
+import { getUser, type UserProfile } from '@/lib/db/users';
 
 interface NavLinkProps {
   href: string;
@@ -34,9 +37,28 @@ interface NavLinkProps {
 const Header = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+
+  // Fetch user profile to check admin status
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        try {
+          const profile = await getUser(user.uid);
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const navItems = [
     { href: '/about', label: 'About' },
@@ -92,6 +114,18 @@ const Header = () => {
         <DropdownMenuItem asChild>
           <Link href="/dashboard">Dashboard</Link>
         </DropdownMenuItem>
+        {userProfile?.isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                Admin Portal
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
@@ -158,6 +192,14 @@ const Header = () => {
                             className="text-lg py-2"
                             onClick={() => setIsOpen(false)}
                           />
+                          {userProfile?.isAdmin && (
+                            <NavLink
+                              href="/admin"
+                              label="Admin Portal"
+                              className="text-lg py-2 flex items-center gap-2"
+                              onClick={() => setIsOpen(false)}
+                            />
+                          )}
                           <Button 
                             onClick={() => {
                               handleSignOut();

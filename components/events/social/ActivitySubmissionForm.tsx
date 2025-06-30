@@ -7,23 +7,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { MapPin, Timer, Image as ImageIcon } from 'lucide-react';
-import { ActivityInput } from '@/lib/db/activities';
+import { useToast } from '@/components/ui/use-toast';
+import { MapPin, Timer, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Activity, ActivityInput } from '@/lib/db/activities';
 
 interface ActivitySubmissionFormProps {
   eventId: string;
+  initialActivity?: Activity;
   onSubmit: (data: ActivityInput) => Promise<any>;
+  autoFocus?: boolean;
 }
 
-export function ActivitySubmissionForm({ eventId, onSubmit }: ActivitySubmissionFormProps) {
+export function ActivitySubmissionForm({ 
+  eventId, 
+  initialActivity, 
+  onSubmit,
+  autoFocus = false
+}: ActivitySubmissionFormProps) {
   const { user } = useAuth();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const { toast } = useToast();
+  const [isExpanded, setIsExpanded] = useState(!!initialActivity);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [distance, setDistance] = useState('');
-  const [hours, setHours] = useState('');
-  const [minutes, setMinutes] = useState('');
-  const [location, setLocation] = useState('');
-  const [notes, setNotes] = useState('');
+  const [distance, setDistance] = useState(initialActivity?.distance.toString() || '');
+  const [hours, setHours] = useState(initialActivity?.hours.toString() || '');
+  const [minutes, setMinutes] = useState(initialActivity?.minutes.toString() || '');
+  const [location, setLocation] = useState(initialActivity?.location || '');
+  const [notes, setNotes] = useState(initialActivity?.notes || '');
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
@@ -73,21 +82,11 @@ export function ActivitySubmissionForm({ eventId, onSubmit }: ActivitySubmission
       
       await onSubmit(activityData);
       
-      // Reset form
-      setDistance('');
-      setHours('');
-      setMinutes('');
-      setLocation('');
-      setNotes('');
-      setImages([]);
-      setPreviewUrls(prev => {
-        // Revoke all URLs to avoid memory leaks
-        prev.forEach(url => URL.revokeObjectURL(url));
-        return [];
+      // Show success but keep form open with current values
+      toast({
+        title: "Reflection saved",
+        description: "You can continue editing or close the form.",
       });
-      
-      // Collapse form after successful submission
-      setIsExpanded(false);
     } catch (error) {
       console.error('Error submitting activity:', error);
     } finally {
@@ -169,13 +168,14 @@ export function ActivitySubmissionForm({ eventId, onSubmit }: ActivitySubmission
             
             <div>
               <Label htmlFor="notes">Reflection</Label>
-              <Textarea
-                id="notes"
-                placeholder="What did you learn from this run? How did it impact you spiritually or emotionally? Share your thoughts..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="min-h-[150px]"
-              />
+                <Textarea
+                  id="notes"
+                  placeholder="What did you learn from this run? How did it impact you spiritually or emotionally? Share your thoughts..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="min-h-[150px]"
+                  autoFocus={autoFocus}
+                />
             </div>
             
             <div>
@@ -243,8 +243,14 @@ export function ActivitySubmissionForm({ eventId, onSubmit }: ActivitySubmission
               <Button
                 type="submit"
                 disabled={isSubmitting || !distance || !minutes || !location}
+                variant={isSubmitting ? "outline" : "default"}
               >
-                {isSubmitting ? 'Posting...' : 'Post Activity'}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : 'Save Reflection'}
               </Button>
             </div>
           </form>

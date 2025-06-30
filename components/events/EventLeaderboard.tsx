@@ -9,11 +9,11 @@ import { useLeaderboard } from './hooks/useLeaderboard';
 import ReactCountryFlag from 'react-country-flag';
 
 interface EventLeaderboardProps {
-  eventId: number;
+  eventId: string;
 }
 
 export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
-  const { loading, error, leaderboard, lastUpdated, refreshLeaderboard } = useLeaderboard(eventId.toString());
+  const { loading, error, leaderboard, lastUpdated, refreshLeaderboard } = useLeaderboard(eventId);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // No need for the countryFlags object anymore as we're using ReactCountryFlag

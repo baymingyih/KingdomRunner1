@@ -106,7 +106,7 @@ export function useGlobalSocialWall(limit: number = 10) {
         await Promise.all(
           socialActivities.map(async (activity) => {
             try {
-              const event = await getEventById(parseInt(activity.eventId));
+              const event = await getEventById(activity.eventId);
               if (event) {
                 activity.eventName = event.name;
               }
