@@ -28,6 +28,7 @@ export interface Activity {
   notes?: string;
   imageUrl?: string;
   imageUrls?: string[];
+  images?: string[];
   timestamp: Date;
   userAvatar?: string;
   userName?: string;
@@ -42,23 +43,33 @@ export interface Activity {
 export interface ActivityInput {
   userId: string;
   eventId: string;
-  distance: string;
-  hours: string;
-  minutes: string;
+  distance: number;
+  hours: number;
+  minutes: number;
+  duration: number;
   location: string;
   notes?: string;
   image?: File | null;
   images?: File[];
-  stravaActivityId?: string; // New field for linking to Strava activities
+  stravaActivityId?: string;
   elevationGain?: number;
   averageHeartRate?: number;
   maxHeartRate?: number;
+  activityType?: string;
+  activityDate?: string;
+  activityTime?: string;
 }
 
 export async function logActivity(input: ActivityInput): Promise<Activity> {
   try {
     let imageUrl: string | undefined;
     let imageUrls: string[] = [];
+
+    // Convert string inputs to numbers if needed
+    const distance = typeof input.distance === 'string' ? parseFloat(input.distance) : input.distance;
+    const hours = typeof input.hours === 'string' ? parseInt(input.hours) : input.hours;
+    const minutes = typeof input.minutes === 'string' ? parseInt(input.minutes) : input.minutes;
+    const duration = typeof input.duration === 'string' ? parseInt(input.duration) : input.duration;
 
     // Handle single image upload if present
     if (input.image instanceof File) {
@@ -99,15 +110,13 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
       : undefined;
 
     // Create activity data without the File object
-    const durationInMinutes = (parseInt(input.hours) || 0) * 60 + (parseInt(input.minutes) || 0);
-
     const activityData: any = {
       userId: input.userId,
       eventId: input.eventId,
-      distance: parseFloat(input.distance),
-      hours: parseInt(input.hours) || 0,
-      minutes: parseInt(input.minutes) || 0,
-      duration: durationInMinutes, // Store total duration in minutes
+      distance: distance || 0,
+      hours: hours || 0,
+      minutes: minutes || 0,
+      duration: duration || 0,
       location: input.location,
       timestamp: Timestamp.now(),
     };
@@ -127,6 +136,7 @@ export async function logActivity(input: ActivityInput): Promise<Activity> {
     }
     if (imageUrls.length > 0) {
       activityData.imageUrls = imageUrls;
+      activityData.images = imageUrls; // Also store in images field for consistency
     }
     if (input.stravaActivityId) {
       activityData.stravaActivityId = input.stravaActivityId;
@@ -249,6 +259,9 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
         if (activityData.imageUrls) {
           result.imageUrls = activityData.imageUrls;
         }
+        if (activityData.images) {
+          result.images = activityData.images;
+        }
         
         // Only add user data if it exists
         if (userData?.avatar !== undefined) {
@@ -287,6 +300,9 @@ export async function getEventActivities(eventId: string): Promise<Activity[]> {
         }
         if (activityData.imageUrls) {
           result.imageUrls = activityData.imageUrls;
+        }
+        if (activityData.images) {
+          result.images = activityData.images;
         }
         
         // Include notes if they exist
@@ -372,6 +388,9 @@ export async function getAllActivities(limit?: number): Promise<Activity[]> {
       }
       if (data.imageUrls) {
         result.imageUrls = data.imageUrls;
+      }
+      if (data.images) {
+        result.images = data.images;
       }
       if (data.notes) {
         result.notes = data.notes;
@@ -505,6 +524,9 @@ export async function getUserActivities(userId: string, eventId?: string): Promi
       }
       if (data.imageUrls) {
         result.imageUrls = data.imageUrls;
+      }
+      if (data.images) {
+        result.images = data.images;
       }
       if (data.notes) {
         result.notes = data.notes;

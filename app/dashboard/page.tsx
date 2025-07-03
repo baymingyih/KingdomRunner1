@@ -1,8 +1,10 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { StravaActivity } from '@/lib/strava';
+import { RecentRuns } from '@/components/events/progress/RecentRuns';
+import { Activity, getUserActivities } from '@/lib/db/activities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -10,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { getUser, createUser, type UserProfile } from '@/lib/db/users';
-import { Loader2, Activity, Calendar, Trophy, Heart, MapPin, Clock, Target, Zap, Plus } from 'lucide-react';
+import { Loader2, Activity as ActivityIcon, Calendar, Trophy, Heart, MapPin, Clock, Target, Zap, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { StravaConnect, type StravaStatus } from '@/components/strava/StravaConnect';
 import { StravaReflectionDashboard } from '@/components/dashboard/StravaReflectionDashboard';
@@ -125,20 +127,41 @@ const mockPrayerStats = {
 };
 
 export default function DashboardPage() {
-  // All hooks must be called in the same order each render
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   
-  // State declarations
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [stravaStatus, setStravaStatus] = useState<StravaStatus | null>(null);
   const [stravaStats, setStravaStats] = useState<any>(null);
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [allActivities, setAllActivities] = useState<Activity[]>([]);
+  const [loadingAllActivities, setLoadingAllActivities] = useState(false);
 
-  // Effect hooks
+  useEffect(() => {
+    const loadAllActivities = async () => {
+      if (!user) return;
+      setLoadingAllActivities(true);
+      try {
+        const activities = await getUserActivities(user.uid);
+        setAllActivities(activities);
+      } catch (error) {
+        console.error('Error loading activities:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load activities",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingAllActivities(false);
+      }
+    };
+
+    loadAllActivities();
+  }, [user, toast]);
+
   useEffect(() => {
     const loadUserData = async () => {
       if (!authLoading && !user) {
@@ -255,7 +278,7 @@ export default function DashboardPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
+            <ActivityIcon className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
           <TabsTrigger value="strava" className="flex items-center gap-2">
@@ -355,7 +378,7 @@ export default function DashboardPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
+                    <ActivityIcon className="h-5 w-5" />
                     Recent Runs
                   </CardTitle>
                 </CardHeader>
@@ -385,9 +408,8 @@ export default function DashboardPage() {
                     ))
                   ) : (
                     <div className="text-center py-8">
-                      <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground mb-4">Connect Strava to see your recent runs</p>
-                      <StravaConnect onStatusChange={setStravaStatus} />
+                      <ActivityIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground mb-4">Connect your Strava account to see your recent runs</p>
                     </div>
                   )}
                 </CardContent>
@@ -407,379 +429,32 @@ export default function DashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Weekly Completion</span>
-                      <span>{mockPrayerStats.weeklyCompletion}%</span>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Weekly Completion</p>
+                      <p className="text-2xl font-bold">{mockPrayerStats.weeklyCompletion}%</p>
                     </div>
-                    <Progress value={mockPrayerStats.weeklyCompletion} className="h-2" />
+                    <div>
+                      <p className="text-sm font-medium">Current Streak</p>
+                      <p className="text-2xl font-bold">{mockPrayerStats.streak} days</p>
+                    </div>
                   </div>
                   
-                  <div className="space-y-3">
-                    {mockPrayerStats.recentPrayers.slice(0, 3).map((prayer) => (
-                      <div key={prayer.id} className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-sm">{prayer.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{prayer.date}</p>
-                      </div>
-                    ))}
+                  <div>
+                    <p className="text-sm font-medium mb-2">Recent Prayers</p>
+                    <div className="space-y-3">
+                      {mockPrayerStats.recentPrayers.map((prayer) => (
+                        <div key={prayer.id} className="bg-muted/50 p-3 rounded-lg">
+                          <p className="text-sm">{prayer.content}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{prayer.date}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  
-                  <Link href="/prayer-wall">
-                    <Button variant="outline" className="w-full">
-                      View Prayer Wall
-                    </Button>
-                  </Link>
                 </CardContent>
               </Card>
             </motion.div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="strava" className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            {stravaStatus?.connected ? (
-              <div className="space-y-6">
-                {/* Stats Overview Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-orange-700">Imported Runs</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-orange-900">
-                        {loadingActivities ? (
-                          <Loader2 className="h-6 w-6 animate-spin inline" />
-                        ) : (
-                          stravaStats?.weeklyRuns || mockStravaStats.weeklyRuns
-                        )}
-                      </div>
-                      <p className="text-xs text-orange-600 mt-1">with reflections</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-purple-700">Prayer Insights</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-purple-900">12</div>
-                      <p className="text-xs text-purple-600 mt-1">spiritual reflections</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-green-700">Faith Miles</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-green-900">
-                        {loadingActivities ? (
-                          <Loader2 className="h-6 w-6 animate-spin inline" />
-                        ) : (
-                          stravaStats?.totalDistance || mockStravaStats.totalDistance
-                        )} km
-                      </div>
-                      <p className="text-xs text-green-600 mt-1">with prayer</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-blue-700">Spiritual Growth</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-blue-900">85%</div>
-                      <p className="text-xs text-blue-600 mt-1">reflection rate</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Main Content */}
-                <StravaReflectionDashboard eventId={1} />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Plus className="h-5 w-5" />
-                        Strava + Prayer Integration
-                      </CardTitle>
-                      <p className="text-muted-foreground">
-                        Connect your Strava account to import activities and add prayer reflections
-                      </p>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <h3 className="font-medium text-blue-800 mb-2">🏃‍♂️ Faith + Fitness Integration</h3>
-                        <p className="text-sm text-blue-700">
-                          Transform your Strava activities into opportunities for spiritual growth. Import your runs, 
-                          add prayer reflections, and connect with a community that values both physical and spiritual wellness.
-                        </p>
-                        <ul className="text-sm text-blue-700 mt-3 space-y-1">
-                          <li>• Import Strava activities with detailed metrics</li>
-                          <li>• Add prayer reflections to your runs</li>
-                          <li>• Share spiritual insights with the community</li>
-                          <li>• Track both physical and spiritual progress</li>
-                        </ul>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">Connect to Strava</h3>
-                        <StravaConnect onStatusChange={setStravaStatus} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Heart className="h-5 w-5" />
-                        What You'll Get
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                          <Activity className="h-5 w-5 text-primary mt-0.5" />
-                          <div>
-                            <h4 className="font-medium">Automatic Import</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Your Strava runs are automatically imported with all metrics
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                          <Heart className="h-5 w-5 text-primary mt-0.5" />
-                          <div>
-                            <h4 className="font-medium">Prayer Reflections</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Add spiritual insights and prayers to each run
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                          <Trophy className="h-5 w-5 text-primary mt-0.5" />
-                          <div>
-                            <h4 className="font-medium">Community Sharing</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Share your faith journey with fellow runners
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </div>
-            )}
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="events" className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Discover Events
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {mockEvents.map((event) => (
-                    <motion.div
-                      key={event.id}
-                      whileHover={{ scale: 1.02 }}
-                      className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="font-semibold">{event.name}</h3>
-                        <Badge variant={event.difficulty === "Beginner" ? "secondary" : "default"}>
-                          {event.difficulty}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {event.date}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Target className="h-3 w-3" />
-                          {event.participants} joined
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link href={`/events/${event.id}`} className="flex-1">
-                          <Button className="w-full">View Details</Button>
-                        </Link>
-                        <Button variant="outline">Quick Join</Button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="activities" className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>My Current Events</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium">#Glory Chasers - 100KM</h4>
-                      <Badge variant="secondary">In Progress</Badge>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span>23.5 / 100 km</span>
-                      </div>
-                      <Progress value={23.5} className="h-2" />
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Days remaining: 32
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Achievement Highlights</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <Trophy className="h-8 w-8 text-yellow-600" />
-                    <div>
-                      <h4 className="font-medium text-yellow-800">First 10K!</h4>
-                      <p className="text-sm text-yellow-600">Completed your first 10km run</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <Heart className="h-8 w-8 text-blue-600" />
-                    <div>
-                      <h4 className="font-medium text-blue-800">Prayer Warrior</h4>
-                      <p className="text-sm text-blue-600">7-day prayer streak achieved</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="prayers" className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-center">Prayer Streak</CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">{mockPrayerStats.streak}</div>
-                <p className="text-muted-foreground">days in a row</p>
-                <div className="mt-4 flex justify-center">
-                  <div className="flex gap-1">
-                    {[...Array(7)].map((_, i) => (
-                      <div
-                        key={i}
-                        className={`w-3 h-3 rounded-full ${
-                          i < mockPrayerStats.streak ? 'bg-primary' : 'bg-muted'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-center">Weekly Goal</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center mb-4">
-                  <div className="text-2xl font-bold">{mockPrayerStats.weeklyCompletion}%</div>
-                  <p className="text-muted-foreground">completed</p>
-                </div>
-                <Progress value={mockPrayerStats.weeklyCompletion} className="h-3" />
-                <p className="text-sm text-muted-foreground text-center mt-2">
-                  6 of 7 days this week
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-center">Total Prayers</CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">{mockPrayerStats.totalPrayers}</div>
-                <p className="text-muted-foreground">prayers shared</p>
-                <Link href="/prayer-wall">
-                  <Button variant="outline" className="w-full mt-4">
-                    Add Prayer
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Prayer Submissions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockPrayerStats.recentPrayers.map((prayer) => (
-                  <div key={prayer.id} className="p-4 border rounded-lg">
-                    <p className="mb-2">{prayer.content}</p>
-                    <p className="text-sm text-muted-foreground">{prayer.date}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>

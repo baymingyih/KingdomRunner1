@@ -102,8 +102,12 @@ export function useLeaderboard(eventId: string) {
           activities: 0 
         };
         
-        userStats.totalDistance += activity.distance;
-        userStats.activities += 1;
+        // Include both regular activities and Strava-imported ones
+        userStats.totalDistance += activity.distance || 0;
+        // Only count as activity if it's not a Strava import (since those are tracked separately)
+        if (!activity.stravaActivityId) {
+          userStats.activities += 1;
+        }
         userMap.set(userId, userStats);
       });
       

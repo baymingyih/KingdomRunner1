@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { deleteActivity } from '@/lib/db/activities';
+import { getAllActivities } from '@/lib/db/activities';
 import { adminAuth } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
     // Get the session cookie
     const cookieStore = await cookies();
@@ -20,19 +20,10 @@ export async function POST(request: Request) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Get the activity ID from the request body
-    const { activityId } = await request.json();
-
-    if (!activityId) {
-      return new NextResponse('Activity ID is required', { status: 400 });
-    }
-
-    // Delete the activity
-    await deleteActivity(activityId);
-
-    return NextResponse.json({ success: true });
+    const activities = await getAllActivities();
+    return NextResponse.json(activities);
   } catch (error) {
-    console.error('Error deleting activity:', error);
+    console.error('Error fetching activities:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

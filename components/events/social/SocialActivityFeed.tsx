@@ -139,29 +139,52 @@ export function SocialActivityFeed({
                         </div>
                       )}
                       
-                      {activity.imageUrl && (
-                        <div className="mt-3 relative aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
-                          <img
-                            src={activity.imageUrl}
-                            alt="Activity"
-                            className="h-full w-full object-contain"
-                          />
-                        </div>
-                      )}
-                      
-                      {activity.imageUrls && activity.imageUrls.length > 0 && (
-                        <div className="mt-3 grid grid-cols-2 gap-2">
-                          {activity.imageUrls.map((url, index) => (
-                            <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
-                              <img
-                                src={url}
-                                alt={`Activity ${index + 1}`}
-                                className="h-full w-full object-contain"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {(() => {
+                        // Check all possible image sources
+                        const hasImages = activity.imageUrl || 
+                                        (activity.imageUrls && activity.imageUrls.length > 0) || 
+                                        (activity.images && activity.images.length > 0);
+
+                        if (!hasImages) return null;
+
+                        return (
+                          <div className="mt-3 grid grid-cols-2 gap-2">
+                            {activity.imageUrl && (
+                              <div className="relative aspect-video w-full overflow-visible rounded-lg border bg-muted/20">
+                                <img
+                                  src={activity.imageUrl}
+                                  alt="Activity"
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => console.error('Failed to load image:', activity.imageUrl, e)}
+                                  style={{ position: 'relative', zIndex: 10 }}
+                                />
+                              </div>
+                            )}
+                            {activity.imageUrls?.map((url, index) => (
+                              <div key={`url-${index}`} className="relative aspect-video w-full overflow-visible rounded-lg border bg-muted/20">
+                                <img
+                                  src={url}
+                                  alt={`Activity ${index + 1}`}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => console.error('Failed to load image:', url, e)}
+                                  style={{ position: 'relative', zIndex: 10 }}
+                                />
+                              </div>
+                            ))}
+                            {activity.images?.map((url, index) => (
+                              <div key={`img-${index}`} className="relative aspect-video w-full overflow-visible rounded-lg border bg-muted/20">
+                                <img
+                                  src={url}
+                                  alt={`Activity ${index + 1}`}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => console.error('Failed to load image:', url, e)}
+                                  style={{ position: 'relative', zIndex: 10 }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                     
                     <div className="flex gap-2 mt-4">

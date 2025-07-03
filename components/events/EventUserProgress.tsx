@@ -12,17 +12,25 @@ import { ProgressStats } from './progress/ProgressStats';
 import { ActivityForm } from './progress/ActivityForm';
 import { RecentRuns } from './progress/RecentRuns';
 import { useProgress } from './progress/useProgress';
-import StravaActivities from '@/components/strava/StravaActivities';
-import { StravaConnect, type StravaStatus } from '@/components/strava/StravaConnect';
 import type { ActivityFormData } from './progress/types';
 
 interface EventUserProgressProps {
   eventId: string;
+  stats: {
+    totalDistance: number;
+    targetDistance: number;
+    totalActivities: number;
+    targetActivities: number;
+  };
+  loading: boolean;
+  error: Error | null;
+  activities: any[];
+  onUpdate: (activity: any) => void;
+  onDelete: (activityId: string) => void;
 }
 
 export function EventUserProgress({ eventId }: EventUserProgressProps) {
   const [submitting, setSubmitting] = useState(false);
-  const [stravaStatus, setStravaStatus] = useState<StravaStatus | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { loading, error, activities, stats, updateActivities, deleteActivity } = useProgress(user?.uid, eventId);
@@ -32,12 +40,15 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
     
     setSubmitting(true);
     try {
+      const hours = parseInt(data.hours);
+      const minutes = parseInt(data.minutes);
       const activity = await logActivity({
         userId: user.uid,
         eventId: eventId.toString(),
-        distance: data.distance.toString(),
-        hours: data.hours.toString(),
-        minutes: data.minutes.toString(),
+        distance: parseInt(data.distance),
+        hours: hours,
+        minutes: minutes,
+        duration: (hours * 60) + minutes,
         location: data.location,
         notes: data.notes,
         images: data.images
@@ -84,38 +95,10 @@ export function EventUserProgress({ eventId }: EventUserProgressProps) {
     <div className="space-y-6">
       <ProgressStats stats={stats} />
       
-      <Tabs defaultValue="strava" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="strava">Strava Integration</TabsTrigger>
-          <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+      <Tabs defaultValue="manual" className="w-full">
+        <TabsList>
+          <TabsTrigger value="manual">My Progress</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="strava" className="space-y-6">
-          <div className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h3 className="font-medium text-blue-800 mb-2">🏃‍♂️ Strava + Prayer Integration</h3>
-              <p className="text-sm text-blue-700">
-                Connect your Strava account to automatically import your activities and add prayer reflections to each run. 
-                This creates a powerful connection between your physical fitness and spiritual growth.
-              </p>
-            </div>
-            
-            <StravaConnect onStatusChange={setStravaStatus} />
-            
-            {stravaStatus?.connected && (
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold">Import Activities & Add Prayer Reflections</h4>
-                <StravaActivities 
-                  eventId={eventId} 
-                  onActivityLogged={() => {
-                    // Refresh the activities list
-                    window.location.reload();
-                  }} 
-                />
-              </div>
-            )}
-          </div>
-        </TabsContent>
         
         <TabsContent value="manual" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

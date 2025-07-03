@@ -44,6 +44,7 @@ interface EventFormData {
   endDate: string;
   theme: string;
   image: string;
+  youtubeUrl: string;
 }
 
 export function EventManagement() {
@@ -76,7 +77,8 @@ export function EventManagement() {
     startDate: '',
     endDate: '',
     theme: '',
-    image: ''
+    image: '',
+    youtubeUrl: ''
   });
   const { toast } = useToast();
 
@@ -87,7 +89,8 @@ export function EventManagement() {
       startDate: '',
       endDate: '',
       theme: '',
-      image: ''
+      image: '',
+      youtubeUrl: ''
     });
   };
 
@@ -108,7 +111,8 @@ export function EventManagement() {
         startDate: formData.startDate,
         endDate: formData.endDate,
         theme: formData.theme,
-        image: formData.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
+        image: formData.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
+        youtubeUrl: formData.youtubeUrl
       };
       const newEvent = await createEvent(eventData as Omit<Event, 'id'>);
 
@@ -137,7 +141,8 @@ export function EventManagement() {
       startDate: event.startDate,
       endDate: event.endDate,
       theme: event.theme,
-      image: event.image
+      image: event.image,
+      youtubeUrl: event.youtubeUrl || ''
     });
   };
 
@@ -280,6 +285,15 @@ export function EventManagement() {
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
+
+              <div>
+                <label className="text-sm font-medium">YouTube URL</label>
+                <Input
+                  value={formData.youtubeUrl}
+                  onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
               
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
@@ -344,6 +358,11 @@ export function EventManagement() {
                       value={formData.theme}
                       onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
                       placeholder="Theme"
+                    />
+                    <Input
+                      value={formData.youtubeUrl}
+                      onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
+                      placeholder="YouTube URL"
                     />
                   </div>
                 ) : (

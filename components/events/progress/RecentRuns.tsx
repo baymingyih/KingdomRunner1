@@ -104,7 +104,7 @@ export function RecentRuns({ activities, onDelete }: RecentRunsProps) {
                         {activity.notes}
                       </p>
                     )}
-                    {(activity.imageUrl || activity.imageUrls) && (
+                    {(activity.imageUrl || activity.imageUrls || activity.images) && (
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         {activity.imageUrl && (
                           <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
@@ -117,6 +117,15 @@ export function RecentRuns({ activities, onDelete }: RecentRunsProps) {
                         )}
                         {activity.imageUrls?.map((url, index) => (
                           <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                            <img
+                              src={url}
+                              alt={`Activity ${index + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ))}
+                        {activity.images?.map((url, index) => (
+                          <div key={`img-${index}`} className="relative aspect-video w-full overflow-hidden rounded-lg border">
                             <img
                               src={url}
                               alt={`Activity ${index + 1}`}

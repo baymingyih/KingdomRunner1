@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { logActivity, deleteActivity, type Activity } from '@/lib/db/activities';
+import { uploadActivityImage } from '@/lib/storage/uploadImage';
 
 interface StravaActivity {
   id: number;
@@ -59,6 +60,7 @@ interface StravaActivity {
 interface ImportedActivity extends Activity {
   stravaData?: StravaActivity;
   isImported?: boolean;
+  images?: string[];
 }
 
 interface ReflectionState {
@@ -75,7 +77,7 @@ interface DeletedReflection {
 }
 
 interface StravaReflectionDashboardProps {
-  eventId: number;
+  eventId: string;
 }
 
 export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboardProps) {
@@ -89,7 +91,8 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
   const [reflections, setReflections] = useState<Map<string, ReflectionState>>(new Map());
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [deletedReflections, setDeletedReflections] = useState<DeletedReflection[]>([]);
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [uploadingImages, setUploadingImages] = useState<{[key: string]: boolean}>({});
+  // Removed auto-save timeout state
 
   // Fetch Strava activities
   useEffect(() => {
@@ -97,7 +100,7 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
       if (!user) return;
       
       try {
-        const response = await fetch(`/api/strava/activities?per_page=20&userId=${user.uid}`);
+        const response = await fetch(`/api/strava/activities?per_page=40&userId=${user.uid}`);
         if (response.ok) {
           const activities = await response.json();
           const runs = activities.filter((a: StravaActivity) => a.type === 'Run');
@@ -161,16 +164,13 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
     
     setImporting(activity.id);
     try {
-      const totalMinutes = Math.floor(activity.moving_time / 60);
-      const hours = Math.floor(totalMinutes / 60).toString();
-      const minutes = (totalMinutes % 60).toString();
-      
       const importedActivity = await logActivity({
         userId: user.uid,
         eventId: eventId.toString(),
-        distance: (activity.distance / 1000).toString(),
-        hours,
-        minutes,
+        distance: activity.distance / 1000, // Convert meters to km
+        hours: Math.floor(activity.moving_time / 3600),
+        minutes: Math.floor((activity.moving_time % 3600) / 60),
+        duration: activity.moving_time,
         location: [activity.location_city, activity.location_country].filter(Boolean).join(', ') || 'Unknown location',
         notes: '',
         images: [],
@@ -233,35 +233,57 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
       const current = prev.get(activityId);
       if (!current) return prev;
       
-      const updated = new Map(prev.set(activityId, {
+      return new Map(prev.set(activityId, {
         ...current,
         content
       }));
-      
-      // Auto-save after 2 seconds of inactivity
-      if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout);
-      }
-      
-      const timeout = setTimeout(() => {
-        if (content.trim() && content !== current.originalContent) {
-          saveReflection(activityId, content, false);
-        }
-      }, 2000);
-      
-      setAutoSaveTimeout(timeout);
-      return updated;
     });
   };
 
   const saveReflection = async (activityId: string, content: string, showToast = true) => {
     try {
+      // Check if any uploads are still in progress
+      if (uploadingImages[activityId]) {
+        throw new Error('Please wait for image uploads to complete before saving');
+      }
+
       // Update the activity in the database
       const activity = Array.from(importedActivities.values()).find(a => a.id === activityId);
       if (!activity) return;
 
-      // For now, we'll simulate saving by updating local state
-      // In a real implementation, you'd update the database here
+      // Update the activity in the database
+      const updatedActivity = {
+        ...activity,
+        notes: content.trim(),
+        images: activity.images || []
+      };
+
+      // Verify all image URLs are valid
+      if (updatedActivity.images.some(img => !img.startsWith('http'))) {
+        throw new Error('Some images are still uploading. Please try again.');
+      }
+
+      const response = await fetch(`/api/activities/${activityId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          notes: content.trim(),
+          images: activity.images || []
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save activity');
+      }
+
+      // Update the imported activities map with the full updated activity
+      setImportedActivities(prev => {
+        const newMap = new Map(prev);
+        newMap.set(activity.stravaActivityId!, updatedActivity);
+        return newMap;
+      });
       
       setReflections(prev => {
         const current = prev.get(activityId);
@@ -272,6 +294,19 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
           isEditing: false,
           originalContent: content.trim()
         }));
+      });
+
+      // Update imported activities map with new notes
+      setImportedActivities(prev => {
+        const newMap = new Map(prev);
+        const activity = newMap.get(activityId);
+        if (activity) {
+          newMap.set(activityId, {
+            ...activity,
+            notes: content.trim()
+          });
+        }
+        return newMap;
       });
 
       if (showToast) {
@@ -406,18 +441,33 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Strava & Prayer Integration</h2>
-          <p className="text-muted-foreground">Import your runs and add spiritual reflections</p>
-        </div>
-        <Badge variant="secondary" className="text-sm">
-          {importedActivities.size} imported runs
-        </Badge>
-      </div>
+      <div className="space-y-6">
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">🏃‍♂️ Strava + Prayer Integration</h2>
+                <p className="text-muted-foreground mt-2 max-w-2xl">
+                  Connect your Strava account to automatically import your activities and add prayer reflections to each run. 
+                  This creates a powerful connection between your physical fitness and spiritual growth.
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Badge variant="default" className="text-sm px-3 py-1.5 bg-blue-100 text-blue-800">
+                  <span className="font-semibold">{importedActivities.size}</span> imported runs
+                </Badge>
+                <Separator orientation="vertical" className="h-5" />
+                <p className="text-sm text-muted-foreground">
+                  {stravaActivities.length} available runs
+                </p>
+              </div>
+            </div>
 
-      <ScrollArea className="h-[600px] pr-4">
+          </CardContent>
+        </Card>
+
+      <ScrollArea className="h-[550px] pr-4">
         <div className="space-y-4">
           {stravaActivities.map((activity) => {
             const isImported = importedActivities.has(activity.id.toString());
@@ -458,6 +508,15 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                             <Badge variant="secondary" className="bg-green-100 text-green-700">
                               Imported
                             </Badge>
+                            {!reflection?.content && (
+                              <Button
+                                onClick={() => startReflection(importedActivity!.id!)}
+                                className="gap-2"
+                              >
+                                <Plus className="h-4 w-4" />
+                                Add Reflection
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
@@ -559,6 +618,25 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                                   </Button>
                                 </div>
                               )}
+                              {(importedActivity?.images?.length || 0) > 0 && (
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  {importedActivity?.images?.map((img: string, i: number) => (
+                                    <a 
+                                      key={i} 
+                                      href={img} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="block w-24 h-24 rounded-md overflow-hidden border"
+                                    >
+                                      <img 
+                                        src={img} 
+                                        alt={`Activity image ${i+1}`}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
                             </div>
 
                             {reflection?.isEditing ? (
@@ -571,9 +649,9 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                                   autoFocus
                                 />
                                 <div className="flex items-center justify-between">
-                                  <p className="text-xs text-muted-foreground">
-                                    Auto-saves after 2 seconds of inactivity
-                                  </p>
+                                  <div className="text-xs text-muted-foreground">
+                                    Changes must be manually saved
+                                  </div>
                                   <div className="flex items-center gap-2">
                                     <Button
                                       variant="outline"
@@ -592,6 +670,92 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                                       Save
                                     </Button>
                                   </div>
+                                </div>
+                                <div className="mt-3">
+                                  <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                                    Add Images (max 5)
+                                  </label>
+                                  <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    multiple
+                                    onChange={async (e) => {
+                                      const files = Array.from(e.target.files || []);
+                                      if (!files.length) return;
+                                      
+                                      const activityId = importedActivity!.id!;
+                                      const userId = importedActivity!.userId!;
+                                      setUploadingImages(prev => ({...prev, [activityId]: true}));
+                                      
+                                      try {
+                                        setUploadingImages(prev => ({...prev, [activityId]: true}));
+                                        
+                                        const newImages = await Promise.all(
+                                          files.map(file => 
+                                            uploadActivityImage(file, userId, activityId)
+                                          )
+                                        );
+                                        
+                                        if (!importedActivity) return;
+                                        
+                                        // Update activity with new images
+                                        const updatedActivity: ImportedActivity = {
+                                          ...importedActivity,
+                                          images: [...(importedActivity.images || []), ...newImages].slice(0, 5)
+                                        };
+
+                                        // Force update the imported activities map
+                                        setImportedActivities(prev => {
+                                          const newMap = new Map(prev);
+                                          newMap.set(importedActivity.stravaActivityId!, updatedActivity);
+                                          return newMap;
+                                        });
+                                        
+                                        await fetch(`/api/activities/${activityId}`, {
+                                          method: 'PATCH',
+                                          headers: {
+                                            'Content-Type': 'application/json',
+                                          },
+                                          body: JSON.stringify({
+                                            images: updatedActivity.images
+                                          })
+                                        });
+                                        
+                                        // Update imported activities map
+                                        setImportedActivities(prev => {
+                                          const newMap = new Map(prev);
+                                          newMap.set(importedActivity.stravaActivityId!, updatedActivity);
+                                          return newMap;
+                                        });
+                                        
+                                        toast({
+                                          title: "Images Uploaded",
+                                          description: "Your images have been uploaded successfully",
+                                        });
+                                      } catch (error: any) {
+                                        toast({
+                                          title: "Upload Failed",
+                                          description: error.message || "Failed to upload images",
+                                          variant: "destructive",
+                                        });
+                                      } finally {
+                                        setUploadingImages(prev => ({...prev, [activityId]: false}));
+                                      }
+                                    }}
+                                    disabled={uploadingImages[importedActivity!.id!]}
+                                    className="block w-full text-sm text-muted-foreground
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-md file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-primary file:text-primary-foreground
+                                      hover:file:bg-primary/90"
+                                  />
+                                  {uploadingImages[importedActivity!.id!] && (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                                      <span>Uploading images... Please wait before saving</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             ) : reflection?.content ? (

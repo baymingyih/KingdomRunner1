@@ -34,6 +34,7 @@ interface Event {
   description: string;
   image: string;
   theme: string;
+  youtubeUrl?: string;
   participants: number;
   prayerGuide: PrayerGuide[];
   leaderboard: Runner[];
@@ -63,6 +64,7 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
     description: doc.data()?.description || '',
     image: doc.data()?.image || '/default-event.jpg',
     theme: doc.data()?.theme || '',
+    youtubeUrl: doc.data()?.youtubeUrl || '',
     participants: doc.data()?.participants || 0,
     prayerGuide: doc.data()?.prayerGuide || [],
     leaderboard: doc.data()?.leaderboard || [],
@@ -112,6 +114,7 @@ export default async function EventPage(props: Props) {
     description: doc.data()?.description || '',
     image: doc.data()?.image || '/default-event.jpg',
     theme: doc.data()?.theme || '',
+    youtubeUrl: doc.data()?.youtubeUrl || '',
     participants: doc.data()?.participants || 0,
     prayerGuide: doc.data()?.prayerGuide || [],
     leaderboard: doc.data()?.leaderboard || [],

@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { type Event } from '@/lib/data/events';
+import { YouTubeEmbed } from '@/components/ui/youtube-embed';
 
 export function EventOverview({ event }: { event: Event }) {
   return (
@@ -15,6 +16,13 @@ export function EventOverview({ event }: { event: Event }) {
             {event.description}
           </p>
         </div>
+
+        {event.youtubeUrl && (
+          <div className="mt-6">
+            <h3 className="text-2xl font-semibold mb-4">Event Video</h3>
+            <YouTubeEmbed url={event.youtubeUrl} className="mt-2" />
+          </div>
+        )}
         
         <div className="flex flex-col gap-4">
           <h3 className="text-2xl font-semibold">Event Details</h3>

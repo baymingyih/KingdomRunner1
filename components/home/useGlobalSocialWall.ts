@@ -54,7 +54,7 @@ export function useGlobalSocialWall(limit = 5) {
   }, []);
 
   // Fetch activities from all events
-  const fetchActivities = useCallback(async () => {
+  const fetchActivities = useCallback(async (isRefresh = false) => {
     try {
       setLoading(true);
       console.log('Fetching all activities...');
@@ -131,8 +131,10 @@ export function useGlobalSocialWall(limit = 5) {
         hasName: !!(a.firstName || a.lastName || a.userName)
       })));
       setActivities(socialActivities);
-      // Update the last refresh time
-      setLastRefreshTime(Date.now());
+      // Only update refresh time on manual refresh
+      if (isRefresh) {
+        setLastRefreshTime(Date.now());
+      }
     } catch (error) {
       console.error('Error loading activities:', error);
       setError(error instanceof Error ? error : new Error('Failed to load activities'));
@@ -142,16 +144,15 @@ export function useGlobalSocialWall(limit = 5) {
     }
   }, [fetchSocialData, user]);
 
-  // Initial load and refresh when lastRefreshTime changes
+  // Initial load only
   useEffect(() => {
     fetchActivities();
-  }, [lastRefreshTime]); // Removed fetchActivities from dependencies since it's stable
+  }, [fetchActivities]); // Add fetchActivities as dependency since it's stable (wrapped in useCallback)
 
   // Function to manually trigger a refresh
   const refreshActivities = useCallback(() => {
-    // Update lastRefreshTime to trigger the useEffect
-    setLastRefreshTime(Date.now());
-  }, []);
+    fetchActivities(true);
+  }, [fetchActivities]);
 
   // Memoize the returned object to prevent unnecessary re-renders
   const result = useMemo(() => ({

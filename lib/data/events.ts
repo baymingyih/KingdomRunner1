@@ -40,6 +40,7 @@ export interface Event {
   theme: string;
   description: string;
   image: string;
+  youtubeUrl?: string;
   prayerGuide: PrayerGuide[];
   leaderboard: Runner[];
   prayers: Prayer[];

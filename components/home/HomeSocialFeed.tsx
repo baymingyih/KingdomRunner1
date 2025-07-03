@@ -100,7 +100,7 @@ export function HomeSocialFeed({ activities }: HomeSocialFeedProps) {
                 
                 <div className="mt-auto">
                   <Link href={`/events/${activity.eventId}`}>
-                    <Button className="w-full border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground">
+                    <Button variant="default" size="lg" className="w-full">
                       View Event
                     </Button>
                   </Link>

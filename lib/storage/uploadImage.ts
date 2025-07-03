@@ -40,8 +40,8 @@ export async function uploadActivityImage(file: File, userId: string, activityId
   } catch (directUploadError: any) {
     console.warn('Direct upload failed, trying API route fallback:', directUploadError);
     
-    // Always fall back to API route for now, until CORS is properly configured
-    console.warn('Direct upload failed, falling back to API route');
+    // Fall back to image-upload API route which provides public URLs
+    console.warn('Direct upload failed, falling back to image-upload API route');
     return uploadViaApiRoute(file, userId, activityId);
   }
 }
@@ -54,8 +54,8 @@ async function uploadViaApiRoute(file: File, userId: string, activityId: string)
     formData.append('userId', userId);
     formData.append('activityId', activityId);
 
-    // Use relative URL to avoid domain resolution issues
-    const response = await fetch('/api/storage/upload', {
+    // Use the image-upload endpoint which provides public URLs
+    const response = await fetch('/api/storage/image-upload', {
       method: 'POST',
       body: formData
     });
@@ -66,11 +66,12 @@ async function uploadViaApiRoute(file: File, userId: string, activityId: string)
       throw new StorageError(errorText || 'Upload failed', response.status.toString());
     }
 
-    const responseText = await response.text();
-    console.log('API route raw response:', responseText);
-    const { url } = JSON.parse(responseText);
-    console.log('API route upload successful! URL:', url);
-    return url;
+    const result = await response.json();
+    if (!result.url) {
+      throw new StorageError('Invalid response from image upload API', 'invalid-response');
+    }
+    console.log('Image upload API successful! URL:', result.url);
+    return result.url;
   } catch (apiError: any) {
     console.error('Error uploading via API route:', apiError);
     

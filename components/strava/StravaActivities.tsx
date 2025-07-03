@@ -294,7 +294,7 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
                           initialActivity={{
                             userId: user?.uid || '',
                             eventId: eventId.toString(),
-                            distance: parseFloat((activity.distance / 1000).toFixed(2)),
+                            distance: activity.distance / 1000,
                             hours: Math.floor(activity.moving_time / 3600),
                             minutes: Math.floor((activity.moving_time % 3600) / 60),
                             duration: Math.floor(activity.moving_time / 60),
@@ -313,12 +313,13 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
                               setImporting(activity.id);
                               
                               // Submit both activity and reflection
-                              await logActivity({
+                              const newActivity = await logActivity({
                                 userId: user.uid,
                                 eventId: eventId.toString(),
-                                distance: data.distance,
-                                hours: data.hours,
-                                minutes: data.minutes,
+                                distance: activity.distance / 1000,
+                                hours: Math.floor(activity.moving_time / 3600),
+                                minutes: Math.floor((activity.moving_time % 3600) / 60),
+                                duration: Math.floor(activity.moving_time / 60),
                                 location: data.location,
                                 notes: data.notes,
                                 images: data.images,
@@ -329,21 +330,18 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
                               });
                               
                               // Update the logged activities map
-                              const newActivity: Activity = {
-                                userId: user.uid,
-                                eventId: eventId.toString(),
-                                distance: parseFloat(data.distance),
-                                hours: parseInt(data.hours),
-                                minutes: parseInt(data.minutes),
-                                duration: parseInt(data.hours) * 60 + parseInt(data.minutes),
-                                location: data.location,
-                                notes: data.notes,
-                                timestamp: new Date(),
-                                stravaActivityId: activity.id.toString(),
-                                elevationGain: activity.total_elevation_gain,
-                                averageHeartRate: activity.average_heartrate,
-                                maxHeartRate: activity.max_heartrate
-                              };
+                              setLoggedActivitiesMap(prev => {
+                                const newMap = new Map(prev);
+                                newMap.set(activity.id.toString(), newActivity);
+                                return newMap;
+                              });
+                              
+                              // Collapse the form
+                              setExpandedActivities(prev => {
+                                const newSet = new Set(prev);
+                                newSet.delete(activity.id);
+                                return newSet;
+                              });
                               
                               setLoggedActivitiesMap(prev => {
                                 const newMap = new Map(prev);
@@ -441,24 +439,32 @@ export default function StravaActivities({ eventId, onActivityLogged }: StravaAc
                                   const hours = Math.floor(totalMinutes / 60).toString();
                                   const minutes = (totalMinutes % 60).toString();
                                   
-                                  // Submit both activity and reflection
-                                  await logActivity({
-                                    userId: user.uid,
-                                    eventId: eventId.toString(),
-                                    distance: (activity.distance / 1000).toString(),
-                                    hours,
-                                    minutes,
-                                    location: [activity.location_city, activity.location_country].filter(Boolean).join(', ') || 'Unknown location',
-                                    notes: data.notes,
-                                    images: data.images,
-                                    stravaActivityId: activity.id.toString(),
-                                    elevationGain: activity.total_elevation_gain,
-                                    averageHeartRate: activity.average_heartrate,
-                                    maxHeartRate: activity.max_heartrate
-                                  });
-                                  
-                                  // Redirect to social wall
-                                  window.location.href = `/social-wall?eventId=${eventId}`;
+                              // Submit both activity and reflection
+                              const newActivity = await logActivity({
+                                userId: user.uid,
+                                eventId: eventId.toString(),
+                                distance: activity.distance / 1000,
+                                hours: Math.floor(activity.moving_time / 3600),
+                                minutes: Math.floor((activity.moving_time % 3600) / 60),
+                                duration: Math.floor(activity.moving_time / 60),
+                                location: data.location,
+                                notes: data.notes,
+                                images: data.images,
+                                stravaActivityId: activity.id.toString(),
+                                elevationGain: activity.total_elevation_gain,
+                                averageHeartRate: activity.average_heartrate,
+                                maxHeartRate: activity.max_heartrate
+                              });
+                              
+                              // Update the logged activities map
+                              setLoggedActivitiesMap(prev => {
+                                const newMap = new Map(prev);
+                                newMap.set(activity.id.toString(), newActivity);
+                                return newMap;
+                              });
+                              
+                              // Call the activity logged callback
+                              onActivityLogged();
                                 } catch (error) {
                                   toast({
                                     title: "Error saving activity",

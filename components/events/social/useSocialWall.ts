@@ -97,18 +97,25 @@ export function useSocialWall(eventId: string) {
     try {
       setLoading(true);
       const eventActivities = await getEventActivities(eventId);
+      console.log('Raw activities from getEventActivities:', eventActivities);
       
       // Get social data for all activities
       const activityIds = eventActivities.map(activity => activity.id!);
       const socialData = await fetchSocialData(activityIds);
+      console.log('Social data:', socialData);
       
-      // Transform activities to include social features
+      // Transform activities to include social features while preserving images
       const socialActivities: SocialActivity[] = eventActivities.map(activity => {
         const activityId = activity.id!;
         const social = socialData[activityId];
         
         return {
           ...activity,
+          // Preserve image fields
+          imageUrl: activity.imageUrl,
+          imageUrls: activity.imageUrls,
+          images: activity.images,
+          // Add social features
           likes: social?.likes || [],
           likeCount: social?.likeCount || 0,
           praises: social?.praises || [],
@@ -118,6 +125,7 @@ export function useSocialWall(eventId: string) {
         };
       });
       
+      console.log('Merged social activities:', socialActivities);
       setActivities(socialActivities);
       setHasMore(eventActivities.length >= 10); // Assuming we fetch 10 at a time
       if (eventActivities.length > 0) {
