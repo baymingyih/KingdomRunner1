@@ -42,6 +42,8 @@ export function ActivitySubmissionForm({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (typeof window === 'undefined') return;
+    
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files);
       setImages(prev => [...prev, ...newFiles]);
@@ -53,10 +55,14 @@ export function ActivitySubmissionForm({
   };
 
   const removeImage = (index: number) => {
+    if (typeof window === 'undefined') return;
+    
     setImages(prev => prev.filter((_, i) => i !== index));
     
     // Revoke the URL to avoid memory leaks
-    URL.revokeObjectURL(previewUrls[index]);
+    if (previewUrls[index]) {
+      URL.revokeObjectURL(previewUrls[index]);
+    }
     setPreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 

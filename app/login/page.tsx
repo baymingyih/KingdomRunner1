@@ -55,6 +55,7 @@ export default function LoginPage() {
         title: "Login Successful",
         description: "You are now signed in",
       });
+      router.push('/events');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Invalid credentials";
       setError('Login failed: ' + errorMessage);
