@@ -1,8 +1,10 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart } from 'lucide-react';
+import { Heart, ExternalLink } from 'lucide-react';
 import { YouTubeEmbed } from '@/components/ui/youtube-embed';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 
 interface Event {
@@ -47,7 +49,18 @@ export default function DailyPrayer() {
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
         {event?.youtubeUrl && (
-          <YouTubeEmbed url={event.youtubeUrl} className="mt-4" />
+          <>
+            <YouTubeEmbed url={event.youtubeUrl} className="mt-4" />
+            <div className="mt-4 flex justify-center">
+              <Button 
+                onClick={() => window.open('https://lovesingapore.org.sg/en/40day/', '_blank', 'noopener,noreferrer')}
+                className="flex items-center gap-2 bg-black text-white hover:bg-black/80"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Visit LoveSingapore 40 Days Prayer
+              </Button>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
