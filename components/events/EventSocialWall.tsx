@@ -91,6 +91,7 @@ export function EventSocialWall({ eventId }: EventSocialWallProps) {
         onComment={commentOnActivity}
         onShare={shareActivity}
         currentUser={user}
+        showInteractionButtons={false}
       />
       
       {hasMore && (

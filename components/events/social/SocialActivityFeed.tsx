@@ -19,6 +19,7 @@ interface SocialActivityFeedProps {
   onComment: (activityId: string, comment: string) => Promise<void>;
   onShare: (activityId: string) => Promise<void>;
   currentUser: User | null;
+  showInteractionButtons?: boolean;
 }
 
 export function SocialActivityFeed({ 
@@ -26,7 +27,8 @@ export function SocialActivityFeed({
   praiseActivity, 
   onComment, 
   onShare,
-  currentUser
+  currentUser,
+  showInteractionButtons = true
 }: SocialActivityFeedProps) {
   const [expandedComments, setExpandedComments] = useState<string[]>([]);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
@@ -187,28 +189,30 @@ export function SocialActivityFeed({
                       })()}
                     </div>
                     
-                    <div className="flex gap-2 mt-4">
-                      <Button 
-                        onClick={() => praiseActivity(activity.id!)}
-                        className={`border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs ${currentUser && activity.praises?.includes(currentUser.uid) ? "bg-primary/10" : ""}`}
-                      >
-                        🙌 Praise God ({activity.praiseCount || 0})
-                      </Button>
-                      <Button 
-                        onClick={() => toggleComments(activity.id!)}
-                        className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        {activity.commentCount || 0} {activity.commentCount === 1 ? 'Comment' : 'Comments'}
-                      </Button>
-                      <Button 
-                        onClick={() => onShare(activity.id!)}
-                        className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs"
-                      >
-                        <Share2 className="h-4 w-4 mr-2" />
-                        Share
-                      </Button>
-                    </div>
+                    {showInteractionButtons !== false && (
+                      <div className="flex gap-2 mt-4">
+                        <Button 
+                          onClick={() => praiseActivity(activity.id!)}
+                          className={`border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs ${currentUser && activity.praises?.includes(currentUser.uid) ? "bg-primary/10" : ""}`}
+                        >
+                          🙌 Praise God ({activity.praiseCount || 0})
+                        </Button>
+                        <Button 
+                          onClick={() => toggleComments(activity.id!)}
+                          className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          {activity.commentCount || 0} {activity.commentCount === 1 ? 'Comment' : 'Comments'}
+                        </Button>
+                        <Button 
+                          onClick={() => onShare(activity.id!)}
+                          className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground px-3 py-1 h-8 text-xs"
+                        >
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Share
+                        </Button>
+                      </div>
+                    )}
                     
                     {expandedComments.includes(activity.id!) && (
                       <div className="mt-4">
