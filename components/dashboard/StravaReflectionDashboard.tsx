@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { StravaConnect, type StravaStatus } from '@/components/strava/StravaConnect';
 import { 
   Calendar, 
   MapPin, 
@@ -89,21 +90,64 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState<number | null>(null);
   const [reflections, setReflections] = useState<Map<string, ReflectionState>>(new Map());
+  const [stravaStatus, setStravaStatus] = useState<StravaStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [deletedReflections, setDeletedReflections] = useState<DeletedReflection[]>([]);
   const [uploadingImages, setUploadingImages] = useState<{[key: string]: boolean}>({});
   // Removed auto-save timeout state
 
   // Fetch Strava activities
+  // Check Strava status on mount
+  useEffect(() => {
+    const checkStravaStatus = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setError(null);
+        const response = await fetch('/api/strava/status', {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const status = await response.json();
+          setStravaStatus(status);
+        } else {
+          const data = await response.json().catch(() => ({}));
+          console.error('Failed to check Strava status:', response.status, data);
+          setError(data.error || 'Failed to check Strava connection status');
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error checking Strava status:', error);
+        setError('Failed to check Strava connection status');
+        setLoading(false);
+      }
+    };
+
+    checkStravaStatus();
+  }, [user]);
+
   useEffect(() => {
     const fetchActivities = async () => {
-      if (!user) return;
+      if (!user || !stravaStatus?.connected) {
+        setLoading(false);
+        return;
+      }
       
       try {
-        const response = await fetch(`/api/strava/activities?per_page=40&userId=${user.uid}`);
+        setError(null);
+        setLoading(true);
+        console.log('Fetching Strava activities...');
+        const response = await fetch(`/api/strava/activities?per_page=40`, {
+          credentials: 'include' // Include cookies in the request
+        });
         if (response.ok) {
           const activities = await response.json();
+          console.log('Activities fetched:', activities);
           const runs = activities.filter((a: StravaActivity) => a.type === 'Run');
+          console.log('Filtered runs:', runs);
           setStravaActivities(runs);
           
           // Check which activities are already imported
@@ -128,9 +172,12 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
         }
       } catch (error) {
         console.error('Error fetching activities:', error);
+        setLoading(false);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load Strava activities';
+        setError(errorMessage);
         toast({
           title: "Error",
-          description: "Failed to load Strava activities",
+          description: errorMessage,
           variant: "destructive",
         });
       } finally {
@@ -139,7 +186,7 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
     };
 
     fetchActivities();
-  }, [user, toast]);
+  }, [user, stravaStatus, toast]);
 
   const formatPace = (speed: number) => {
     if (!speed || speed <= 0) return "0:00";
@@ -263,11 +310,12 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
         throw new Error('Some images are still uploading. Please try again.');
       }
 
-      const response = await fetch(`/api/activities/${activityId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        const response = await fetch(`/api/activities/${activityId}`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         body: JSON.stringify({
           notes: content.trim(),
           images: activity.images || []
@@ -437,6 +485,45 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-red-50 border-red-200">
+        <CardContent className="p-6 text-center">
+          <div className="max-w-md mx-auto space-y-4">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+            <h2 className="text-xl font-bold tracking-tight text-red-700">Connection Error</h2>
+            <p className="text-red-600">{error}</p>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+              className="mt-4"
+            >
+              Try Again
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!stravaStatus?.connected) {
+    return (
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <CardContent className="p-6 text-center">
+          <div className="max-w-md mx-auto space-y-4">
+            <h2 className="text-2xl font-bold tracking-tight">🏃‍♂️ Connect with Strava</h2>
+            <p className="text-muted-foreground">
+              Connect your Strava account to automatically import your activities and add prayer reflections to each run.
+            </p>
+            <div className="flex justify-center pt-4">
+              <StravaConnect onStatusChange={setStravaStatus} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
