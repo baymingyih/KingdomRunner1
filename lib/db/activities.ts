@@ -170,45 +170,50 @@ export async function getActivitiesByStravaIds(userId: string, stravaActivityIds
       return new Map();
     }
 
-    const activitiesRef = collection(db, 'activities');
-    const q = query(
-      activitiesRef,
-      where('userId', '==', userId),
-      where('stravaActivityId', 'in', stravaActivityIds)
-    );
-    
-    const querySnapshot = await getDocs(q);
     const activitiesMap = new Map<string, Activity>();
-    
-    querySnapshot.docs.forEach(docSnapshot => {
-      const data = docSnapshot.data();
-      const activity: Activity = {
-        id: docSnapshot.id,
-        userId: data.userId,
-        eventId: data.eventId,
-        distance: data.distance,
-        hours: data.hours,
-        minutes: data.minutes,
-        duration: data.duration,
-        location: data.location,
-        timestamp: data.timestamp.toDate(),
-        notes: data.notes,
-        imageUrl: data.imageUrl,
-        imageUrls: data.imageUrls,
-        userAvatar: data.userAvatar,
-        userName: data.userName,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        stravaActivityId: data.stravaActivityId,
-        elevationGain: data.elevationGain,
-        averageHeartRate: data.averageHeartRate,
-        maxHeartRate: data.maxHeartRate
-      };
+    const activitiesRef = collection(db, 'activities');
+
+    // Process in batches of 10 (Firestore 'in' query limit)
+    for (let i = 0; i < stravaActivityIds.length; i += 10) {
+      const batch = stravaActivityIds.slice(i, i + 10);
+      const q = query(
+        activitiesRef,
+        where('userId', '==', userId),
+        where('stravaActivityId', 'in', batch)
+      );
       
-      if (activity.stravaActivityId) {
-        activitiesMap.set(activity.stravaActivityId, activity);
-      }
-    });
+      const querySnapshot = await getDocs(q);
+      
+      querySnapshot.docs.forEach(docSnapshot => {
+        const data = docSnapshot.data();
+        const activity: Activity = {
+          id: docSnapshot.id,
+          userId: data.userId,
+          eventId: data.eventId,
+          distance: data.distance,
+          hours: data.hours,
+          minutes: data.minutes,
+          duration: data.duration,
+          location: data.location,
+          timestamp: data.timestamp.toDate(),
+          notes: data.notes,
+          imageUrl: data.imageUrl,
+          imageUrls: data.imageUrls,
+          userAvatar: data.userAvatar,
+          userName: data.userName,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          stravaActivityId: data.stravaActivityId,
+          elevationGain: data.elevationGain,
+          averageHeartRate: data.averageHeartRate,
+          maxHeartRate: data.maxHeartRate
+        };
+        
+        if (activity.stravaActivityId) {
+          activitiesMap.set(activity.stravaActivityId, activity);
+        }
+      });
+    }
     
     return activitiesMap;
   } catch (error) {

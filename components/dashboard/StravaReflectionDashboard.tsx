@@ -152,23 +152,39 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
           
           // Check which activities are already imported
           const stravaIds = runs.map((a: StravaActivity) => a.id.toString());
-          const { getActivitiesByStravaIds } = await import('@/lib/db/activities');
-          const importedMap = await getActivitiesByStravaIds(user.uid, stravaIds);
-          setImportedActivities(importedMap);
+          console.log('Checking imported activities for Strava IDs:', stravaIds);
           
-          // Initialize reflections state
-          const reflectionsMap = new Map<string, ReflectionState>();
-          importedMap.forEach((activity, stravaId) => {
-            if (activity.notes) {
-              reflectionsMap.set(activity.id!, {
-                activityId: activity.id!,
-                content: activity.notes,
-                isEditing: false,
-                originalContent: activity.notes
-              });
-            }
-          });
-          setReflections(reflectionsMap);
+          try {
+            const { getActivitiesByStravaIds } = await import('@/lib/db/activities');
+            const importedMap = await getActivitiesByStravaIds(user.uid, stravaIds);
+            console.log('Successfully fetched imported activities:', importedMap);
+            
+            // Initialize reflections state from the imported activities
+            const reflectionsMap = new Map<string, ReflectionState>();
+            importedMap.forEach((activity: ImportedActivity, stravaId: string) => {
+              if (activity.notes) {
+                reflectionsMap.set(activity.id!, {
+                  activityId: activity.id!,
+                  content: activity.notes,
+                  isEditing: false,
+                  originalContent: activity.notes
+                });
+              }
+            });
+            
+            setImportedActivities(importedMap);
+            setReflections(reflectionsMap);
+          } catch (error) {
+            console.error('Error checking imported activities:', error);
+            toast({
+              title: "Warning",
+              description: "Some activities may not display correctly. Please try refreshing the page.",
+              variant: "destructive",
+            });
+            // Continue with empty maps rather than failing completely
+            setImportedActivities(new Map());
+            setReflections(new Map());
+          }
         }
       } catch (error) {
         console.error('Error fetching activities:', error);
