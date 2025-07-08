@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ModeToggle } from './mode-toggle';
 import { Button } from './ui/button';
 import { Menu, LogOut, Shield } from 'lucide-react';
 import {
@@ -156,12 +155,10 @@ const Header = () => {
                 )}
               </>
             )}
-            <ModeToggle />
           </nav>
 
           {/* Mobile Navigation */}
           <div className="flex items-center space-x-4 md:hidden">
-            <ModeToggle />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button>

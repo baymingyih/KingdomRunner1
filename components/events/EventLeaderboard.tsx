@@ -136,7 +136,7 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
                     </td>
                     <td className="p-4 font-medium">{runner.distance}km</td>
                     <td className="p-4 w-32">
-                      <div className="w-full bg-muted rounded-full h-2.5 dark:bg-gray-700">
+                      <div className="w-full bg-muted rounded-full h-2.5">
                         <div 
                           className={`h-2.5 rounded-full ${
                             index === 0 ? 'bg-yellow-500' : 

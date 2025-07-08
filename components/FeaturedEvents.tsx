@@ -56,7 +56,7 @@ export default function FeaturedEvents() {
                   {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                 </span>
               </div>
-              <p className="mb-4 line-clamp-3 text-gray-700 dark:text-gray-300">{event.description}</p>
+              <p className="mb-4 line-clamp-3 text-gray-700">{event.description}</p>
               <Button className="w-full mt-auto" size="lg">
                 <Link href={`/events/${event.id}`} className="w-full h-full flex items-center justify-center">
                   View Details
