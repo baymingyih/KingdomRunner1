@@ -27,6 +27,8 @@ const defaultConfig = {
 };
 
 // Use environment variables if available, otherwise fall back to default config
+import { initializeApp } from 'firebase/app';
+
 export const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || defaultConfig.apiKey,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 
@@ -39,6 +41,9 @@ export const firebaseConfig: FirebaseOptions = {
 };
 
 // Validate config in development
+// Initialize Firebase
+export const firebaseApp = initializeApp(firebaseConfig);
+
 if (process.env.NODE_ENV === 'development') {
   validateConfig();
 }

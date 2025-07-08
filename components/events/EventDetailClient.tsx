@@ -47,12 +47,12 @@ export default function EventDetailClient({ event }: { event: Event }) {
         <Card className="mb-8">
           <CardContent className="p-4 sm:p-6">
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-8">
-              <TabsList className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-4 bg-transparent">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-                <TabsTrigger value="social-wall">Encouragement Wall</TabsTrigger>
-                {user && <TabsTrigger value="my-progress">My Progress</TabsTrigger>}
-                {user && <TabsTrigger value="strava-prayer">Strava + Prayer</TabsTrigger>}
+              <TabsList className="flex flex-wrap gap-2 sm:grid sm:grid-cols-5 sm:gap-4 bg-transparent px-2 py-2">
+                <TabsTrigger value="overview" className="whitespace-nowrap">Overview</TabsTrigger>
+                <TabsTrigger value="leaderboard" className="whitespace-nowrap">Leaderboard</TabsTrigger>
+                <TabsTrigger value="social-wall" className="whitespace-nowrap">Encouragement</TabsTrigger>
+                {user && <TabsTrigger value="my-progress" className="whitespace-nowrap">Progress</TabsTrigger>}
+                {user && <TabsTrigger value="strava-prayer" className="whitespace-nowrap">Prayer</TabsTrigger>}
               </TabsList>
 
               <AnimatePresence mode="wait">
