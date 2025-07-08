@@ -4,17 +4,34 @@ import { Event } from '@/lib/data/events';
 
 export async function GET() {
   try {
-    // Get all events and find the most recent one
-    const eventsSnapshot = await adminFirestore.collection('events').get();
-    const events = eventsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Event[];
+    // Query for active events (where endDate is in future)
+    const now = new Date();
+    const eventsQuery = adminFirestore.collection('events')
+      .where('endDate', '>=', now)
+      .orderBy('endDate', 'asc')
+      .limit(1);
 
-    // Sort by startDate to get the most recent event
-    const currentEvent = events.sort((a, b) => 
-      new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-    )[0];
+    const snapshot = await eventsQuery.get();
+    
+    if (snapshot.empty) {
+      // Fallback to most recent event if no active ones
+      const allEvents = await adminFirestore.collection('events')
+        .orderBy('startDate', 'desc')
+        .limit(1)
+        .get();
+
+      if (allEvents.empty) {
+        return NextResponse.json({ error: 'No events found' }, { status: 404 });
+      }
+      
+      const currentEvent = allEvents.docs[0].data() as Event;
+      return NextResponse.json({
+        id: allEvents.docs[0].id,
+        youtubeUrl: currentEvent.youtubeUrl
+      });
+    }
+
+    const currentEvent = snapshot.docs[0].data() as Event;
 
     if (!currentEvent) {
       return NextResponse.json({ error: 'No events found' }, { status: 404 });

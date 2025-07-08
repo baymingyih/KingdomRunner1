@@ -51,8 +51,9 @@ export async function middleware(request: NextRequest) {
       '/dashboard',
       '/admin',
       '/api/activities',
-      '/api/events'
-    ].some(route => pathname.startsWith(route));
+      // Exclude events/current from auth check
+      pathname.startsWith('/api/events') && !pathname.startsWith('/api/events/current')
+    ].some(route => typeof route === 'string' ? pathname.startsWith(route) : route);
     
     const isAuthRoute = ['/login', '/register', '/forgot-password'].includes(pathname);
     const isApiRoute = pathname.startsWith('/api');
@@ -123,6 +124,7 @@ export const config = {
     '/login',
     '/register',
     '/forgot-password',
-    '/api/:path*'
+    // Exclude events/current from middleware entirely
+    '/api/((?!events/current).*)'
   ]
 };
