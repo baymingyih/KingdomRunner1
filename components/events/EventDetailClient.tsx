@@ -52,7 +52,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
                 <TabsTrigger value="leaderboard" className="whitespace-nowrap">Leaderboard</TabsTrigger>
                 <TabsTrigger value="social-wall" className="whitespace-nowrap">Encouragement</TabsTrigger>
                 {user && <TabsTrigger value="my-progress" className="whitespace-nowrap">Manual+</TabsTrigger>}
-                {user && <TabsTrigger value="strava-prayer" className="whitespace-nowrap">Strave+</TabsTrigger>}
+                {user && <TabsTrigger value="strava-prayer" className="whitespace-nowrap">Strava+</TabsTrigger>}
               </TabsList>
 
               <AnimatePresence mode="wait">
