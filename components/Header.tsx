@@ -60,10 +60,17 @@ const Header = () => {
     fetchUserProfile();
   }, [user]);
 
-  const navItems = [
+  const defaultNavItems = [
     { href: '/about', label: 'About' },
     { href: '/events', label: 'Events' },
   ];
+
+  const loggedInNavItems = [
+    ...defaultNavItems,
+    { href: '/dashboard', label: 'Dashboard' },
+  ];
+
+  const navItems = user ? loggedInNavItems : defaultNavItems;
 
   const handleSignOut = async () => {
     try {
@@ -111,9 +118,6 @@ const Header = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard">Dashboard</Link>
-        </DropdownMenuItem>
         {userProfile?.isAdmin && (
           <>
             <DropdownMenuSeparator />
@@ -186,12 +190,6 @@ const Header = () => {
                     <>
                       {user ? (
                         <>
-                          <NavLink
-                            href="/dashboard"
-                            label="Dashboard"
-                            className="text-lg py-2"
-                            onClick={() => setIsOpen(false)}
-                          />
                           {userProfile?.isAdmin && (
                             <NavLink
                               href="/admin"

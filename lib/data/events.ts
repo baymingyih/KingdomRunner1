@@ -10,7 +10,7 @@ export interface Runner {
   name: string;
   country: string;
   distance: number;
-  prayers: number;
+  activities: number;
 }
 
 export interface Prayer {
@@ -154,9 +154,9 @@ export const events: Event[] = [
       }
     ],
     leaderboard: [
-      { id: "1", name: "Emma Johnson", country: "US", distance: 5.2, prayers: 12 },
-      { id: "2", name: "Liu Wei", country: "CN", distance: 5.1, prayers: 8 },
-      { id: "3", name: "Maria Garcia", country: "ES", distance: 5.0, prayers: 15 }
+      { id: "1", name: "Emma Johnson", country: "US", distance: 5.2, activities: 12 },
+      { id: "2", name: "Liu Wei", country: "CN", distance: 5.1, activities: 8 },
+      { id: "3", name: "Maria Garcia", country: "ES", distance: 5.0, activities: 15 }
     ],
     prayers: [
       { id: 1, runner: "Emma Johnson", content: "Grateful for this global community of runners!", timestamp: "2023-11-15T10:00:00Z" },

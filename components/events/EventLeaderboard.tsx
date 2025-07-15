@@ -109,7 +109,7 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-lg">{runner.distance}km</div>
-                  <div className="text-sm text-muted-foreground">{runner.prayers} activities</div>
+                  <div className="text-sm text-muted-foreground">{runner.activities} activities</div>
                 </div>
               </div>
               <div className="mt-2">
@@ -200,7 +200,7 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
                         {Math.round((runner.distance / 100) * 100)}%
                       </div>
                     </td>
-                    <td className="p-4">{runner.prayers}</td>
+                    <td className="p-4">{runner.activities}</td>
                   </tr>
                 );
               })}

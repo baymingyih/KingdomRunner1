@@ -104,10 +104,7 @@ export function useLeaderboard(eventId: string) {
         
         // Include both regular activities and Strava-imported ones
         userStats.totalDistance += activity.distance || 0;
-        // Only count as activity if it's not a Strava import (since those are tracked separately)
-        if (!activity.stravaActivityId) {
-          userStats.activities += 1;
-        }
+        userStats.activities += 1;
         userMap.set(userId, userStats);
       });
       
@@ -122,7 +119,7 @@ export function useLeaderboard(eventId: string) {
               : activities.find(a => a.userId === userId)?.userName || 'Unknown Runner',
             country: getValidCountryCode(user?.country || 'US'),
             distance: parseFloat(stats.totalDistance.toFixed(1)),
-            prayers: stats.activities // Using activity count as prayer count for now
+            activities: stats.activities
           } as Runner;
         } catch (error) {
           console.error(`Error fetching user ${userId}:`, error);
