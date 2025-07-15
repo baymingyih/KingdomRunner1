@@ -570,8 +570,8 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
           </CardContent>
         </Card>
 
-      <ScrollArea className="h-[550px] pr-4">
-        <div className="space-y-4">
+      <ScrollArea className="min-h-[calc(100vh-200px)] pb-16 sm:pb-0 sm:pr-4">
+        <div className="space-y-4 px-2 sm:px-0">
           {stravaActivities.map((activity) => {
             const isImported = importedActivities.has(activity.id.toString());
             const importedActivity = importedActivities.get(activity.id.toString());
@@ -587,9 +587,9 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                 <Card className={`transition-all duration-200 ${
                   isImported ? 'border-green-200 bg-green-50/50 shadow-md' : 'hover:bg-muted/50'
                 }`}>
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     {/* Activity Header */}
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
                       <div className="flex items-start gap-4">
                         <div className="flex items-center gap-2">
                           {isImported && (
@@ -652,7 +652,7 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                     </div>
 
                     {/* Activity Stats */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-primary" />
                         <div>
@@ -722,22 +722,24 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                                 </div>
                               )}
                               {(importedActivity?.images?.length || 0) > 0 && (
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                  {importedActivity?.images?.map((img: string, i: number) => (
-                                    <a 
-                                      key={i} 
-                                      href={img} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="block w-24 h-24 rounded-md overflow-hidden border"
-                                    >
-                                      <img 
-                                        src={img} 
-                                        alt={`Activity image ${i+1}`}
-                                        className="w-full h-full object-cover"
-                                      />
-                                    </a>
-                                  ))}
+                                <div className="mt-3 overflow-x-auto">
+                                  <div className="flex gap-2 w-max min-w-full pb-2">
+                                    {importedActivity?.images?.map((img: string, i: number) => (
+                                      <a 
+                                        key={i} 
+                                        href={img} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="block w-24 h-24 rounded-md overflow-hidden border flex-shrink-0"
+                                      >
+                                        <img 
+                                          src={img} 
+                                          alt={`Activity image ${i+1}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </a>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -747,15 +749,15 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                                 <Textarea
                                   value={reflection.content}
                                   onChange={(e) => handleReflectionChange(importedActivity!.id!, e.target.value)}
-                                  placeholder="Share your spiritual insights from this run... How did God speak to you? What did you learn? What are you grateful for?"
-                                  className="min-h-[120px] bg-white"
+                                  placeholder="Share your spiritual insights from this run..."
+                                  className="min-h-[120px] bg-white w-full"
                                   autoFocus
                                 />
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
                                   <div className="text-xs text-muted-foreground">
                                     Changes must be manually saved
                                   </div>
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -873,13 +875,15 @@ export function StravaReflectionDashboard({ eventId }: StravaReflectionDashboard
                                 <p className="text-muted-foreground mb-3">
                                   No reflection added yet
                                 </p>
-                                <Button
-                                  onClick={() => startReflection(importedActivity!.id!)}
-                                  className="gap-2"
-                                >
-                                  <Plus className="h-4 w-4" />
-                                  Add Reflection
-                                </Button>
+                              <Button
+                                onClick={() => startReflection(importedActivity!.id!)}
+                                className="gap-2"
+                                size="sm"
+                              >
+                                <Plus className="h-4 w-4" />
+                                <span className="hidden sm:inline">Add Reflection</span>
+                                <span className="sm:hidden">Add</span>
+                              </Button>
                               </div>
                             )}
                           </div>

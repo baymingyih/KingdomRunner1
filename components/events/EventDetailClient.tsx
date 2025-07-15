@@ -45,15 +45,17 @@ export default function EventDetailClient({ event }: { event: Event }) {
         <EventHero event={event} />
 
         <Card className="mb-8">
-          <CardContent className="p-4 sm:p-6">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-8">
-              <TabsList className="flex flex-wrap gap-2 sm:grid sm:grid-cols-5 sm:gap-4 bg-transparent px-2 py-2">
-                <TabsTrigger value="overview" className="whitespace-nowrap">Overview</TabsTrigger>
-                <TabsTrigger value="leaderboard" className="whitespace-nowrap">Leaderboard</TabsTrigger>
-                <TabsTrigger value="social-wall" className="whitespace-nowrap">Encouragement</TabsTrigger>
-                {user && <TabsTrigger value="my-progress" className="whitespace-nowrap">Manual+</TabsTrigger>}
-                {user && <TabsTrigger value="strava-prayer" className="whitespace-nowrap">Strava+</TabsTrigger>}
-              </TabsList>
+          <CardContent className="p-2 sm:p-4">
+            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+              <div className="overflow-x-auto pb-2 -mb-2">
+                <TabsList className="flex gap-1 sm:gap-2 bg-transparent w-max">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+                  <TabsTrigger value="social-wall">Encouragement Wall</TabsTrigger>
+                  {user && <TabsTrigger value="my-progress">Manual+</TabsTrigger>}
+                  {user && <TabsTrigger value="strava-prayer">Strava+</TabsTrigger>}
+                </TabsList>
+              </div>
 
               <AnimatePresence mode="wait">
                 <motion.div

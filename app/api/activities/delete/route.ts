@@ -1,38 +1,42 @@
 import { NextResponse } from 'next/server';
 import { deleteActivity } from '@/lib/db/activities';
 import { adminAuth } from '@/lib/firebase/admin';
-import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
-    // Get the session cookie
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('__session')?.value;
+    const { activityId, token } = await request.json();
 
-    if (!sessionCookie) {
-      return new NextResponse('Unauthorized', { status: 401 });
+    if (!token) {
+      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Verify the session cookie and get the user
     try {
-      await adminAuth.verifySessionCookie(sessionCookie);
+      await adminAuth.verifyIdToken(token);
     } catch (error) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
-
-    // Get the activity ID from the request body
-    const { activityId } = await request.json();
 
     if (!activityId) {
-      return new NextResponse('Activity ID is required', { status: 400 });
+      return new NextResponse(JSON.stringify({ error: 'Activity ID is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Delete the activity
     await deleteActivity(activityId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: 'Activity deleted successfully' });
   } catch (error) {
     console.error('Error deleting activity:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return new NextResponse(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }

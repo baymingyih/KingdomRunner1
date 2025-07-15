@@ -50,7 +50,7 @@ export function EventHero({ event }: { event: Event }) {
             {formatDate(startDate)} to {formatDate(endDate)}
           </Badge>
           {isOngoing && (
-            <Badge variant="secondary" className="text-lg py-1.5">
+            <Badge variant="secondary" className="text-lg py-1.5 dark:bg-green-900/30 dark:text-green-300">
               <Clock className="w-4 h-4 mr-2" />
               Event in Progress
             </Badge>

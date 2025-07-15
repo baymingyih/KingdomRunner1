@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { onAuthChange } from './client';
+import { onAuthChange } from './firebase';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthChange((user: User | null) => {
+    const unsubscribe = onAuthChange((user) => {
       setUser(user);
       setLoading(false);
     });

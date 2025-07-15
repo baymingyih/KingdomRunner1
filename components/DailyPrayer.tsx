@@ -18,23 +18,32 @@ export default function DailyPrayer() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     const fetchEvent = async () => {
       try {
-        const response = await fetch('/api/events/current');
+        const response = await fetch('/api/events/current', { signal });
         if (!response.ok) {
           throw new Error('Failed to fetch event data');
         }
         const data = await response.json();
         setEvent(data);
-      } catch (err) {
-        setError('Failed to load event data');
-        console.error(err);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          setError('Failed to load event data');
+          console.error(err);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvent();
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   return (

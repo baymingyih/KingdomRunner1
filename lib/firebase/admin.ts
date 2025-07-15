@@ -40,13 +40,13 @@ if (!admin.apps.length) {
 }
 
 // Verify storage initialization
-const app = admin.app();
-export const adminStorage = admin.storage();
+export const adminStorage = (() => {
+  const storage = admin.storage();
+  if (!storage) {
+    throw new Error('Firebase Storage not initialized');
+  }
+  return storage;
+})();
+
 export const adminAuth = admin.auth();
 export const adminFirestore = admin.firestore();
-
-if (!app) {
-  throw new Error('Firebase Admin app not initialized');
-}
-
-export default app;

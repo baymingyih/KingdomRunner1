@@ -116,7 +116,7 @@ export function useLeaderboard(eventId: string) {
         try {
           const user = await getUser(userId);
           return {
-            id: parseInt(userId),
+            id: userId,
             name: user?.firstName && user?.lastName 
               ? `${user.firstName} ${user.lastName}`
               : activities.find(a => a.userId === userId)?.userName || 'Unknown Runner',

@@ -16,8 +16,6 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
   const { loading, error, leaderboard, lastUpdated, refreshLeaderboard } = useLeaderboard(eventId);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // No need for the countryFlags object anymore as we're using ReactCountryFlag
-
   // Auto-refresh every 60 seconds if enabled
   useEffect(() => {
     if (!autoRefresh) return;
@@ -57,33 +55,86 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
         <div className="flex items-center gap-2">
           <Button 
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className="flex items-center gap-1 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
+            variant="outline"
+            className="flex items-center gap-1 h-8 px-3 py-1"
             title={autoRefresh ? "Pause auto-refresh" : "Enable auto-refresh"}
           >
             {autoRefresh ? (
               <>
                 <Pause className="h-4 w-4" />
-                <span className="sr-only md:not-sr-only">Auto</span>
+                <span className="hidden sm:inline">Auto</span>
               </>
             ) : (
               <>
                 <Play className="h-4 w-4" />
-                <span className="sr-only md:not-sr-only">Auto</span>
+                <span className="hidden sm:inline">Auto</span>
               </>
             )}
           </Button>
           <Button 
             onClick={refreshLeaderboard}
-            className="flex items-center gap-1 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
+            variant="outline"
+            className="flex items-center gap-1 h-8 px-3 py-1"
           >
             <RefreshCw className="h-4 w-4" />
-            <span className="sr-only md:not-sr-only">Refresh</span>
+            <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
       </div>
       
       <ScrollArea className="h-[500px]">
-        <div className="rounded-md border">
+        {/* Mobile View */}
+        <div className="md:hidden">
+          {leaderboard.map((runner, index) => (
+            <div key={runner.id} className={`p-4 border-b ${index < 3 ? 'bg-muted/20' : ''}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-lg w-6 text-center">
+                    {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                  </span>
+                  <div>
+                    <div className="font-medium">{runner.name}</div>
+                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                      {runner.country && (
+                        <ReactCountryFlag 
+                          countryCode={runner.country} 
+                          svg 
+                          style={{ width: '1.2em', height: '1.2em' }}
+                          title={runner.country}
+                        />
+                      )}
+                      {runner.country}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-lg">{runner.distance}km</div>
+                  <div className="text-sm text-muted-foreground">{runner.prayers} activities</div>
+                </div>
+              </div>
+              <div className="mt-2">
+                <div className="w-full bg-muted rounded-full h-2.5 dark:bg-gray-700">
+                  <div 
+                    className={`h-2.5 rounded-full ${
+                      index === 0 ? 'bg-yellow-400' : 
+                      index === 1 ? 'bg-slate-400' : 
+                      index === 2 ? 'bg-orange-500' : 'bg-primary'
+                    }`} 
+                    style={{ width: `${Math.min(100, (runner.distance / 100) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          ))}
+          {leaderboard.length === 0 && (
+            <div className="p-8 text-center text-muted-foreground">
+              No runners have logged activities yet
+            </div>
+          )}
+        </div>
+
+        {/* Desktop View */}
+        <div className="hidden md:block rounded-md border">
           <table className="w-full">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -97,14 +148,13 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
             </thead>
             <tbody>
               {leaderboard.map((runner, index) => {
-                // Determine medal for top 3 positions
                 let medal = null;
                 if (index === 0) {
-                  medal = <span className="inline-flex justify-center items-center w-6 h-6 rounded-full bg-yellow-500 text-white font-bold">1</span>;
+                  medal = <span className="inline-flex justify-center items-center w-6 h-6 rounded-full bg-yellow-400 text-white font-bold">1</span>;
                 } else if (index === 1) {
-                  medal = <span className="inline-flex justify-center items-center w-6 h-6 rounded-full bg-gray-300 text-white font-bold">2</span>;
+                  medal = <span className="inline-flex justify-center items-center w-6 h-6 rounded-full bg-slate-400 text-white font-bold">2</span>;
                 } else if (index === 2) {
-                  medal = <span className="inline-flex justify-center items-center w-6 h-6 rounded-full bg-amber-700 text-white font-bold">3</span>;
+                  medal = <span className="inline-flex justify-center items-center w-6 h-6 rounded-full bg-orange-500 text-white font-bold">3</span>;
                 }
                 
                 return (
@@ -113,7 +163,7 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
                     className={`border-b ${index < 3 ? 'bg-muted/20' : ''}`}
                   >
                     <td className="p-4">
-                      {medal || index + 1}
+                      {medal || <span className="inline-flex justify-center items-center w-6 h-6">{index + 1}</span>}
                     </td>
                     <td className="p-4 font-medium">{runner.name}</td>
                     <td className="p-4">
@@ -131,17 +181,17 @@ export function EventLeaderboard({ eventId }: EventLeaderboardProps) {
                         ) : (
                           <span className="text-xl">🌍</span>
                         )}
-                        {runner.country}
+                        <span className="hidden lg:inline">{runner.country}</span>
                       </span>
                     </td>
                     <td className="p-4 font-medium">{runner.distance}km</td>
                     <td className="p-4 w-32">
-                      <div className="w-full bg-muted rounded-full h-2.5">
+                      <div className="w-full bg-muted rounded-full h-2.5 dark:bg-gray-700">
                         <div 
                           className={`h-2.5 rounded-full ${
-                            index === 0 ? 'bg-yellow-500' : 
-                            index === 1 ? 'bg-gray-300' : 
-                            index === 2 ? 'bg-amber-700' : 'bg-primary'
+                            index === 0 ? 'bg-yellow-400' : 
+                            index === 1 ? 'bg-slate-400' : 
+                            index === 2 ? 'bg-orange-500' : 'bg-primary'
                           }`} 
                           style={{ width: `${Math.min(100, (runner.distance / 100) * 100)}%` }}
                         ></div>

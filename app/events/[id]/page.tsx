@@ -3,43 +3,7 @@ import EventDetailClient from '@/components/events/EventDetailClient';
 import { adminFirestore } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-
-interface PrayerGuide {
-  day: number;
-  title: string;
-  verse: string;
-  prayer: string;
-}
-
-interface Runner {
-  id: number;
-  name: string;
-  country: string;
-  distance: number;
-  prayers: number;
-}
-
-interface Prayer {
-  id: number;
-  runner: string;
-  content: string;
-  timestamp: string;
-}
-
-interface Event {
-  id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-  image: string;
-  theme: string;
-  youtubeUrl?: string;
-  participants: number;
-  prayerGuide: PrayerGuide[];
-  leaderboard: Runner[];
-  prayers: Prayer[];
-}
+import { Event } from '@/lib/data/events';
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const params = await props.params;

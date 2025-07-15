@@ -1,38 +1,12 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Activity images
     match /activities/{userId}/{activityId}/{fileName} {
-      allow read: if request.auth != null 
-                  && (resource.data.visibility == 'public' || 
-                      request.auth.uid == userId ||
-                      isAdmin());
+      allow read: if request.auth != null;
       allow write: if request.auth != null
                    && request.auth.uid == userId
                    && request.resource.size < 5 * 1024 * 1024  // 5MB max
-                   && request.resource.contentType.matches('image/.*')
-                   && (request.resource.metadata == null || 
-                       request.resource.metadata.size() <= 10); // Limit metadata
-    }
-
-    // Profile pictures
-    match /profilePictures/{userId}/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.auth.uid == userId
-                   && request.resource.size < 2 * 1024 * 1024  // 2MB max
                    && request.resource.contentType.matches('image/.*');
     }
-
-    // Admin-only uploads
-    match /admin/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if isAdmin();
-    }
-  }
-
-  // Helper function
-  function isAdmin() {
-    return request.auth.token.admin == true;
   }
 }

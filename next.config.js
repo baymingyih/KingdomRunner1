@@ -21,20 +21,6 @@ const nextConfig = {
       '@': path.resolve(__dirname),
     };
 
-    // Handle node: protocol imports
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      stream: require.resolve('stream-browserify'),
-      crypto: require.resolve('crypto-browserify'),
-      util: require.resolve('util/'),
-      path: require.resolve('path-browserify'),
-    };
-
-    // Exclude firebase-admin from client-side bundles
-    if (!isServer) {
-      config.resolve.alias['firebase-admin'] = false;
-    }
-
     // Handle private class fields in undici
     config.module.rules.push({
       test: /\.m?js$/,

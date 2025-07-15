@@ -55,6 +55,13 @@ export function useProgress(userId: string | undefined, eventId?: string) {
         throw new Error(errorData.error || 'Failed to delete activity');
       }
 
+      const result = await response.json();
+
+      toast({
+        title: "Activity Deleted",
+        description: result.message,
+      });
+
       const updatedActivities = activities.filter(a => a.id !== activityId);
       setActivities(updatedActivities);
       setStats(calculateStats(updatedActivities));
