@@ -47,8 +47,8 @@ export default function EventDetailClient({ event }: { event: Event }) {
         <Card className="mb-8">
           <CardContent className="p-2 sm:p-4">
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-              <div className="overflow-x-auto pb-2 -mb-2">
-                <TabsList className="flex gap-1 sm:gap-2 bg-transparent w-max">
+              <div className="">
+                <TabsList className="flex flex-wrap gap-1 sm:gap-2 bg-transparent">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
                   <TabsTrigger value="social-wall">Encouragement Wall</TabsTrigger>
