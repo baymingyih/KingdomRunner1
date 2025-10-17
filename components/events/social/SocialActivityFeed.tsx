@@ -151,19 +151,21 @@ export function SocialActivityFeed({
                         if (allImages.length === 0) return null;
 
                         const gridClassName = allImages.length > 1
-                          ? "grid grid-cols-1 sm:grid-cols-2 gap-2"
+                          ? "grid grid-cols-1 sm:grid-cols-2 gap-3"
                           : "";
 
                         return (
-                          <div className={`mt-3 ${gridClassName}`}>
+                          <div className={`mt-4 ${gridClassName}`}>
                             {allImages.map((url, index) => (
-                              <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
-                                <img
-                                  src={url}
-                                  alt={`Activity image ${index + 1}`}
-                                  className="h-full w-full object-contain"
-                                  onError={(e) => console.error('Failed to load image:', url, e)}
-                                />
+                              <div key={index} className="relative w-full overflow-hidden rounded-lg border bg-muted/20">
+                                <div className="aspect-[4/3] sm:aspect-video">
+                                  <img
+                                    src={url}
+                                    alt={`Activity image ${index + 1}`}
+                                    className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
+                                    onError={(e) => console.error('Failed to load image:', url, e)}
+                                  />
+                                </div>
                               </div>
                             ))}
                           </div>
