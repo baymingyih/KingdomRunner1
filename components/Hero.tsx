@@ -42,9 +42,7 @@ export default function Hero() {
           <Button className="bg-black/90 text-white hover:bg-black px-6 py-4 text-lg font-medium rounded-md transition-all duration-200 border-2 border-white hover:border-white/80">
             <Link href="/about">About Us</Link>
           </Button>
-          <Button className="bg-white/10 text-white hover:bg-white/20 px-6 py-4 text-lg font-medium rounded-md transition-all duration-200 border-2 border-white hover:border-white/80 backdrop-blur-sm">
-            <Link href="/events">Upcoming Events</Link>
-          </Button>
+
         </motion.div>
       </div>
     </section>
