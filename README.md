@@ -1,4 +1,4 @@
-y# Kingdom Runners
+# Kingdom Runners
 
 ## Image Upload Implementation
 

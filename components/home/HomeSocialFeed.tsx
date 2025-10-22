@@ -87,12 +87,16 @@ export function HomeSocialFeed({ activities }: HomeSocialFeedProps) {
                     <p className="text-sm mb-3 line-clamp-2">{activity.notes}</p>
                   )}
                   
-                  {activity.imageUrl && (
+                  {(activity.imageUrl || (activity.imageUrls && activity.imageUrls.length > 0) || (activity.images && activity.images.length > 0)) && (
                     <div className="relative aspect-video w-full overflow-hidden rounded-lg border mb-3">
                       <img
-                        src={activity.imageUrl}
+                        src={`${activity.imageUrl || (activity.imageUrls && activity.imageUrls[0]) || (activity.images && activity.images[0])}?t=${activity.timestamp.getTime()}`}
                         alt="Activity"
                         className="h-full w-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}
