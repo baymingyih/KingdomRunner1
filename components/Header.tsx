@@ -100,9 +100,11 @@ const Header = () => {
     </Link>
   );
 
-  const getInitials = (email: string): string => {
-    return email
-      .split('@')[0]
+  const getInitials = (name: string): string => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
       .slice(0, 2)
       .toUpperCase();
   };
@@ -112,7 +114,7 @@ const Header = () => {
       <DropdownMenuTrigger asChild>
         <Button className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback>{user ? getInitials(user.email!) : 'UK'}</AvatarFallback>
+            <AvatarFallback className="bg-primary text-primary-foreground">{user ? getInitials(user.displayName || user.email!) : 'UK'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
