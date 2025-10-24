@@ -92,7 +92,7 @@ export function HomeSocialFeed({ activities }: HomeSocialFeedProps) {
                       <img
                         src={`${activity.imageUrl || (activity.imageUrls && activity.imageUrls[0]) || (activity.images && activity.images[0])}?t=${activity.timestamp.getTime()}`}
                         alt="Activity"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                         loading="lazy"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
