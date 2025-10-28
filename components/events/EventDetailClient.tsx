@@ -29,7 +29,7 @@ const fadeIn = {
 import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export default function EventDetailClient({ event }: { event: Event }) {
-  const [selectedTab, setSelectedTab] = useState("social-wall");
+  const [selectedTab, setSelectedTab] = useState("overview");
   const { user } = useAuth();
   const { loading, error, activities, stats, updateActivities, deleteActivity } = 
     useProgress(user?.uid, event.id);
