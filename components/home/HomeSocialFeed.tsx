@@ -82,19 +82,46 @@ export function HomeSocialFeed({ activities }: HomeSocialFeedProps) {
                     <p className="text-sm mb-3 line-clamp-2">{activity.notes}</p>
                   )}
                   
-                  {(activity.imageUrl || (activity.imageUrls && activity.imageUrls.length > 0) || (activity.images && activity.images.length > 0)) && (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg border mb-3">
-                      <img
-                        src={`${activity.imageUrl || (activity.imageUrls && activity.imageUrls[0]) || (activity.images && activity.images[0])}?t=${activity.timestamp.getTime()}`}
-                        alt="Activity"
-                        className="h-full w-full object-contain"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
+                  {(() => {
+                    const images = activity.imageUrls || activity.images || (activity.imageUrl ? [activity.imageUrl] : []);
+                    if (images.length === 0) return null;
+
+                    if (images.length === 1) {
+                      return (
+                        <div className="relative aspect-video w-full overflow-hidden rounded-lg border mb-3">
+                          <img
+                            src={`${images[0]}?t=${activity.timestamp.getTime()}`}
+                            alt="Activity"
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      );
+                    }
+
+                    // For multiple images, show up to 4 in a 2x2 grid
+                    return (
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border mb-3">
+                        <div className="grid grid-cols-2 gap-1 h-full">
+                          {images.slice(0, 4).map((img, index) => (
+                            <img
+                              key={index}
+                              src={`${img}?t=${activity.timestamp.getTime()}`}
+                              alt={`Activity ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
                 
                 <div className="mt-auto">
