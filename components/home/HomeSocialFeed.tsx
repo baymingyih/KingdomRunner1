@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Heart, MapPin, Timer } from 'lucide-react';
+import { Heart, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
@@ -72,11 +72,6 @@ export function HomeSocialFeed({ activities }: HomeSocialFeedProps) {
                       {activity.hours > 0 ? `${activity.hours}h ` : ''}
                       {activity.minutes > 0 ? `${activity.minutes}m` : activity.hours > 0 ? '0m' : '0 minutes'}
                     </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{activity.location}</span>
                   </div>
                   
                   <p className="text-lg font-semibold mb-2">
